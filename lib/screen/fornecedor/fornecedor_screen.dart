@@ -122,10 +122,6 @@ class FornecedorScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                _chip("Qualquer status",
-                    controller.filtroStatus == FiltroStatusF.todos,
-                        () => controller.setFiltroStatus(FiltroStatusF.todos)),
-                const SizedBox(width: 8),
                 _chipColor(
                   "Ativo",
                   controller.filtroStatus == FiltroStatusF.ativo,

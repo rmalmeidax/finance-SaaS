@@ -1,3 +1,4 @@
+import 'package:finance/screen/cliente/cliente_screen.dart';
 import 'package:finance/screen/contas_receber/contas_receber_screen.dart';
 import 'package:finance/screen/fornecedor/fornecedor_screen.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,14 @@ class HomeScreen extends StatelessWidget {
               title: "Clientes",
               icon: Icons.people,
               color: Colors.teal,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ClienteScreen(),
+                    ),
+                );
+              },
             ),
           ],
         ),

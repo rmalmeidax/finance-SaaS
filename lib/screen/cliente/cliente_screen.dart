@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-
 import '../../controllers/clientes_controller.dart';
 import '../../model/clientes_model.dart';
+
+
 
 class ClienteScreen extends StatelessWidget {
   const ClienteScreen({super.key});
@@ -124,12 +125,6 @@ class ClienteScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                _chip(
-                    "Qualquer status",
-                    controller.filtroStatus == FiltroStatusCliente.todos,
-                        () => controller
-                        .setFiltroStatus(FiltroStatusCliente.todos)),
-                const SizedBox(width: 8),
                 _chipColor(
                   "Ativo",
                   controller.filtroStatus == FiltroStatusCliente.ativo,
