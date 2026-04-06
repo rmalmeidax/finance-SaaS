@@ -2,22 +2,21 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
-import '../model/fornecedor_model.dart';
+import '../model/clientes_model.dart';
 
 
-class FornecedorService {
-  final _col = FirebaseFirestore.instance.collection('tab_fornecedores');
+class ClienteService {
+  final _col = FirebaseFirestore.instance.collection('tab_clientes');
 
-  // ── LISTAR ──
-  Stream<List<Fornecedor>> listar() {
+  Stream<List<Cliente>> listar() {
     return _col.snapshots().map((snap) {
       return snap.docs.map((doc) {
         final d = doc.data();
-        return Fornecedor(
+        return Cliente(
           id: doc.id,
           tipoPessoa: d['tipoPessoa'] == 'juridica'
-              ? TipoPessoa.juridica
-              : TipoPessoa.fisica,
+              ? TipoPessoaCliente.juridica
+              : TipoPessoaCliente.fisica,
           nome: d['nome'] ?? '',
           fantasia: d['fantasia'] ?? '',
           documento: d['documento'] ?? '',
@@ -36,37 +35,33 @@ class FornecedorService {
     });
   }
 
-  // ── SALVAR ──
-  Future<void> salvar(Fornecedor f) async {
-    await _col.doc(f.id).set({
-      'tipoPessoa': f.tipoPessoa.name,
-      'nome': f.nome,
-      'fantasia': f.fantasia,
-      'documento': f.documento,
-      'logradouro': f.logradouro,
-      'numero': f.numero,
-      'complemento': f.complemento,
-      'bairro': f.bairro,
-      'cidade': f.cidade,
-      'estado': f.estado,
-      'cep': f.cep,
-      'telefone': f.telefone,
-      'email': f.email,
-      'status': f.status,
+  Future<void> salvar(Cliente c) async {
+    await _col.doc(c.id).set({
+      'tipoPessoa': c.tipoPessoa.name,
+      'nome': c.nome,
+      'fantasia': c.fantasia,
+      'documento': c.documento,
+      'logradouro': c.logradouro,
+      'numero': c.numero,
+      'complemento': c.complemento,
+      'bairro': c.bairro,
+      'cidade': c.cidade,
+      'estado': c.estado,
+      'cep': c.cep,
+      'telefone': c.telefone,
+      'email': c.email,
+      'status': c.status,
     });
   }
 
-  // ── ATUALIZAR STATUS ──
   Future<void> alterarStatus(String id, String status) async {
     await _col.doc(id).update({'status': status});
   }
 
-  // ── EXCLUIR ──
   Future<void> excluir(String id) async {
     await _col.doc(id).delete();
   }
 
-  // ── BUSCAR CNPJ na ReceitaWS ──
   Future<Map<String, dynamic>?> buscarCnpj(String cnpj) async {
     final raw = cnpj.replaceAll(RegExp(r'[^0-9]'), '');
     final url = Uri.parse('https://brasilapi.com.br/api/cnpj/v1/$raw');

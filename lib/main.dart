@@ -1,5 +1,6 @@
 import 'package:finance/controllers/conta_pagar_controller.dart';
 import 'package:finance/controllers/fornecedor_controller.dart';
+import 'package:finance/services/cliente_service.dart';
 import 'package:finance/services/conta_pagar_service.dart';
 import 'package:finance/services/fornecedor_service.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:finance/screen/auth/login_screen.dart';
 
 // 🔹 Tema
+import 'controllers/clientes_controller.dart';
 import 'core/theme/app_theme.dart';
 
 // 🔹 Firebase config
@@ -38,7 +40,10 @@ void main() async {
           create: (_) => ContaPagarController(ContaPagarService()),
         ),
         ChangeNotifierProvider(
-          create: (_) => FornecedorController(),
+          create: (_) => FornecedorController(FornecedorService()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ClienteController(ClienteService()),
         ),
      ],
       child: const MyApp(),

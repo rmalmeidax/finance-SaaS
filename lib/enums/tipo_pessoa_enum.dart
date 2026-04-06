@@ -1,0 +1,1 @@
+enum TipoPessoa { fisica, juridica }
