@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "383981160798",
+    "project_id": "finance-530c4",
+    "storage_bucket": "finance-530c4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383981160798:android:8c0816834f53729cab27cf",
+        "android_client_info": {
+          "package_name": "com.example.finance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuWGmIX-gDcuSuvfE8uFpD5AoB1MECXP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383981160798:android:d2a1c5853e4234daab27cf",
+        "android_client_info": {
+          "package_name": "com.rmalmeidax.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuWGmIX-gDcuSuvfE8uFpD5AoB1MECXP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
