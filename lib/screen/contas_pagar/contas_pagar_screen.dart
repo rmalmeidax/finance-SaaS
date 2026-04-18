@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/conta_pagar_controller.dart';
+import '../../widgets/theme_toggle_button.dart';
 
 class ContasPagarScreen extends StatelessWidget {
   const ContasPagarScreen({super.key});
@@ -19,15 +20,17 @@ class ContasPagarScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<ContaPagarController>(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFFD4AF37), size: 18),
+          icon: Icon(Icons.arrow_back_ios_new, color: theme.primaryColor, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -35,16 +38,16 @@ class ContasPagarScreen extends StatelessWidget {
             Container(
               width: 3,
               height: 22,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD4AF37),
-                borderRadius: BorderRadius.all(Radius.circular(2)),
+              decoration: BoxDecoration(
+                color: theme.primaryColor,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
             ),
             const SizedBox(width: 10),
-            const Text(
+            Text(
               "CONTAS A PAGAR",
               style: TextStyle(
-                color: Colors.white,
+                color: theme.textTheme.titleLarge?.color,
                 fontFamily: 'serif',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -54,16 +57,17 @@ class ContasPagarScreen extends StatelessWidget {
           ],
         ),
         actions: [
+          const ThemeToggleButton(),
           Container(
             margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFD4AF37),
+              color: theme.primaryColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
               iconSize: 18,
-              icon: const Icon(Icons.add, color: Colors.black),
+              icon: Icon(Icons.add, color: isDark ? Colors.black : Colors.white),
               onPressed: () => _showDialog(context, controller),
             ),
           ),
@@ -76,16 +80,16 @@ class ContasPagarScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF161616),
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2A2A2A)),
+                border: Border.all(color: theme.dividerColor),
               ),
               child: TextField(
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: "Buscar fornecedor ou descrição...",
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFFD4AF37), size: 18),
+                  hintStyle: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3), fontSize: 14),
+                  prefixIcon: Icon(Icons.search, color: theme.primaryColor, size: 18),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -97,23 +101,26 @@ class ContasPagarScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── DASHBOARD ──
-          _dashboard(controller),
+          _dashboard(context, controller),
 
           const SizedBox(height: 20),
 
           // ── FILTROS ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                _filtroChip("Todas", FiltroStatus.todos, controller),
-                const SizedBox(width: 8),
-                _filtroChip("A pagar", FiltroStatus.aVencer, controller),
-                const SizedBox(width: 8),
-                _filtroChip("Vencidas", FiltroStatus.vencidos, controller),
-                const SizedBox(width: 8),
-                _filtroChip("Pagas", FiltroStatus.pagos, controller),
-              ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _filtroChip(context, "Todas", FiltroStatus.todos, controller),
+                  const SizedBox(width: 8),
+                  _filtroChip(context, "A pagar", FiltroStatus.aVencer, controller),
+                  const SizedBox(width: 8),
+                  _filtroChip(context, "Vencidas", FiltroStatus.vencidos, controller),
+                  const SizedBox(width: 8),
+                  _filtroChip(context, "Pagas", FiltroStatus.pagos, controller),
+                ],
+              ),
             ),
           ),
 
@@ -127,12 +134,12 @@ class ContasPagarScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.receipt_long_outlined,
-                      color: Colors.white.withOpacity(0.15), size: 56),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.15), size: 56),
                   const SizedBox(height: 12),
                   Text(
                     "Nenhuma conta encontrada",
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.3),
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
                         fontSize: 14,
                         letterSpacing: 1),
                   ),
@@ -156,6 +163,7 @@ class ContasPagarScreen extends StatelessWidget {
   // ── CARD ──
   Widget _contaCard(
       BuildContext context, ContaPagar conta, ContaPagarController controller) {
+    final theme = Theme.of(context);
     final hoje = DateTime.now();
     final vencida = hoje.isAfter(conta.dataVencimento) && conta.status != "Pago" && conta.status != "Recebido";
     final paga = conta.status == "Pago" || conta.status == "Recebido";
@@ -164,7 +172,7 @@ class ContasPagarScreen extends StatelessWidget {
         ? const Color(0xFF4CAF50)
         : vencida
         ? const Color(0xFFE53935)
-        : const Color(0xFFD4AF37);
+        : theme.primaryColor;
 
     String statusLabel = paga
         ? "PAGO"
@@ -175,9 +183,9 @@ class ContasPagarScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E1E)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         children: [
@@ -200,8 +208,8 @@ class ContasPagarScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     conta.descricao.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: theme.textTheme.titleMedium?.color,
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
                       letterSpacing: 1.5,
@@ -237,19 +245,19 @@ class ContasPagarScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _infoItem(Icons.store_outlined, "Fornecedor", conta.fornecedor),
-                    _infoItem(Icons.description_outlined, "Documento", conta.numeroDocumento),
-                    _infoItem(Icons.category_outlined, "Tipo", conta.tipoDocumento.name),
+                    _infoItem(context, Icons.store_outlined, "Fornecedor", conta.fornecedor),
+                    _infoItem(context, Icons.description_outlined, "Documento", conta.numeroDocumento),
+                    _infoItem(context, Icons.category_outlined, "Tipo", conta.tipoDocumento.name),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _infoItem(Icons.calendar_today_outlined, "Emissão",
+                    _infoItem(context, Icons.calendar_today_outlined, "Emissão",
                         _formatData(conta.dataEmissao)),
-                    _infoItem(Icons.event_outlined, "Vencimento",
+                    _infoItem(context, Icons.event_outlined, "Vencimento",
                         _formatData(conta.dataVencimento)),
-                    _infoItem(Icons.percent_outlined, "Juros/Multa",
+                    _infoItem(context, Icons.percent_outlined, "Juros/Multa",
                         "${conta.juros.toStringAsFixed(1)}% / ${conta.multa.toStringAsFixed(1)}%"),
                   ],
                 ),
@@ -264,7 +272,7 @@ class ContasPagarScreen extends StatelessWidget {
                         Text(
                           "VALOR ATUALIZADO",
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                            color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
                             fontSize: 9,
                             letterSpacing: 1.5,
                           ),
@@ -282,7 +290,7 @@ class ContasPagarScreen extends StatelessWidget {
                           Text(
                             "Original: R\$ ${formatar(conta.valorBoleto)}",
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.3),
+                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
                               fontSize: 11,
                               decoration: TextDecoration.lineThrough,
                             ),
@@ -291,12 +299,13 @@ class ContasPagarScreen extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        // Atualizar
+                        // Recalcular
                         _actionButton(
+                          context,
                           icon: Icons.refresh_rounded,
                           tooltip: "Recalcular",
-                          color: const Color(0xFF1E1E1E),
-                          iconColor: Colors.white60,
+                          color: theme.dividerColor.withOpacity(0.05),
+                          iconColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.5) ?? Colors.grey,
                           onTap: () async {
                             conta.valorAtualizado =
                                 controller.calcularValorAtualizado(conta);
@@ -306,19 +315,21 @@ class ContasPagarScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         // Editar
                         _actionButton(
+                          context,
                           icon: Icons.edit_outlined,
                           tooltip: "Editar",
-                          color: const Color(0xFF1A1A2E),
-                          iconColor: const Color(0xFF7986CB),
+                          color: theme.primaryColor.withOpacity(0.1),
+                          iconColor: theme.primaryColor,
                           onTap: () => _showDialog(context, controller, conta: conta),
                         ),
                         const SizedBox(width: 8),
                         // Pagar
                         if (!paga)
                           _actionButton(
+                            context,
                             icon: Icons.check_rounded,
                             tooltip: "Marcar como Pago",
-                            color: const Color(0xFF0A1F0A),
+                            color: const Color(0xFF4CAF50).withOpacity(0.1),
                             iconColor: const Color(0xFF4CAF50),
                             onTap: () async {
                               await controller.service.marcarComoPago(conta.id);
@@ -336,19 +347,20 @@ class ContasPagarScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoItem(IconData icon, String label, String value) {
+  Widget _infoItem(BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 11, color: const Color(0xFFD4AF37)),
+              Icon(icon, size: 11, color: theme.primaryColor),
               const SizedBox(width: 4),
               Text(
                 label.toUpperCase(),
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.35),
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.35),
                   fontSize: 9,
                   letterSpacing: 1,
                 ),
@@ -358,7 +370,7 @@ class ContasPagarScreen extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -366,7 +378,8 @@ class ContasPagarScreen extends StatelessWidget {
     );
   }
 
-  Widget _actionButton({
+  Widget _actionButton(
+    BuildContext context, {
     required IconData icon,
     required String tooltip,
     required Color color,
@@ -393,32 +406,33 @@ class ContasPagarScreen extends StatelessWidget {
   }
 
   // ── FILTRO CHIP ──
-  Widget _filtroChip(String label, FiltroStatus filtro, ContaPagarController c) {
+  Widget _filtroChip(BuildContext context, String label, FiltroStatus filtro, ContaPagarController c) {
+    final theme = Theme.of(context);
     final selecionado = c.filtroAtual == filtro;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => c.setFiltro(filtro),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: selecionado ? const Color(0xFFD4AF37) : const Color(0xFF161616),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selecionado
-                  ? const Color(0xFFD4AF37)
-                  : const Color(0xFF2A2A2A),
-            ),
+    return GestureDetector(
+      onTap: () => c.setFiltro(filtro),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        decoration: BoxDecoration(
+          color: selecionado ? theme.primaryColor : theme.cardColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selecionado
+                ? theme.primaryColor
+                : theme.dividerColor,
           ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: selecionado ? Colors.black : Colors.white54,
-              fontSize: 11,
-              fontWeight: selecionado ? FontWeight.w700 : FontWeight.w400,
-              letterSpacing: 0.5,
-            ),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: selecionado 
+                ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) 
+                : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+            fontSize: 11,
+            fontWeight: selecionado ? FontWeight.w700 : FontWeight.w400,
+            letterSpacing: 0.5,
           ),
         ),
       ),
@@ -426,7 +440,8 @@ class ContasPagarScreen extends StatelessWidget {
   }
 
   // ── DASHBOARD ──
-  Widget _dashboard(ContaPagarController controller) {
+  Widget _dashboard(BuildContext context, ContaPagarController controller) {
+    final theme = Theme.of(context);
     double total = 0, vencido = 0, aPagar = 0;
     final hoje = DateTime.now();
     for (var c in controller.contas) {
@@ -440,65 +455,91 @@ class ContasPagarScreen extends StatelessWidget {
       }
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
+    return LayoutBuilder(builder: (context, constraints) {
+      final isMobile = constraints.maxWidth < 500;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: isMobile
+            ? Column(
+                children: [
+                  _dashCard(context, "TOTAL", total, theme.primaryColor, Icons.account_balance_wallet_outlined, isFullWidth: true),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _dashCard(context, "VENCIDO", vencido, const Color(0xFFE53935), Icons.warning_amber_outlined),
+                      const SizedBox(width: 10),
+                      _dashCard(context, "A PAGAR", aPagar, const Color(0xFF42A5F5), Icons.schedule_outlined),
+                    ],
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  _dashCard(context, "TOTAL", total, theme.primaryColor, Icons.account_balance_wallet_outlined),
+                  const SizedBox(width: 10),
+                  _dashCard(context, "VENCIDO", vencido, const Color(0xFFE53935), Icons.warning_amber_outlined),
+                  const SizedBox(width: 10),
+                  _dashCard(context, "A PAGAR", aPagar, const Color(0xFF42A5F5), Icons.schedule_outlined),
+                ],
+              ),
+      );
+    });
+  }
+
+  Widget _dashCard(BuildContext context, String titulo, double valor, Color cor, IconData icon, {bool isFullWidth = false}) {
+    final theme = Theme.of(context);
+    final card = Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cor.withOpacity(0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: cor.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _dashCard("TOTAL", total, const Color(0xFFD4AF37), Icons.account_balance_wallet_outlined),
-          const SizedBox(width: 10),
-          _dashCard("VENCIDO", vencido, const Color(0xFFE53935), Icons.warning_amber_outlined),
-          const SizedBox(width: 10),
-          _dashCard("A PAGAR", aPagar, const Color(0xFF42A5F5), Icons.schedule_outlined),
+          Row(
+            children: [
+              Icon(icon, size: 13, color: cor),
+              const SizedBox(width: 5),
+              Text(
+                titulo,
+                style: TextStyle(
+                  color: cor,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "R\$",
+            style: TextStyle(color: theme.textTheme.bodySmall?.color?.withOpacity(0.4), fontSize: 10),
+          ),
+          Text(
+            formatar(valor),
+            style: TextStyle(
+              color: theme.textTheme.bodyLarge?.color,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
-  }
 
-  Widget _dashCard(String titulo, double valor, Color cor, IconData icon) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFF111111),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: cor.withOpacity(0.25)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 13, color: cor),
-                const SizedBox(width: 5),
-                Text(
-                  titulo,
-                  style: TextStyle(
-                    color: cor,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "R\$",
-              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
-            ),
-            Text(
-              formatar(valor),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
+    return isFullWidth ? card : Expanded(child: card);
   }
 
   String _formatData(DateTime d) =>
@@ -507,6 +548,7 @@ class ContasPagarScreen extends StatelessWidget {
   // ── DIALOG ──
   void _showDialog(BuildContext context, ContaPagarController controller,
       {ContaPagar? conta}) {
+    final theme = Theme.of(context);
     final fornecedor = TextEditingController(text: conta?.fornecedor ?? '');
     final descricao = TextEditingController(text: conta?.descricao ?? '');
     final numero = TextEditingController(text: conta?.numeroDocumento ?? '');
@@ -537,9 +579,9 @@ class ContasPagarScreen extends StatelessWidget {
           builder: (context, setState) {
             return Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF111111),
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF2A2A2A)),
+                border: Border.all(color: theme.dividerColor),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -547,9 +589,9 @@ class ContasPagarScreen extends StatelessWidget {
                   // Header
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Color(0xFF1E1E1E)),
+                        bottom: BorderSide(color: theme.dividerColor),
                       ),
                     ),
                     child: Row(
@@ -558,15 +600,15 @@ class ContasPagarScreen extends StatelessWidget {
                           width: 3,
                           height: 18,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD4AF37),
+                            color: theme.primaryColor,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Text(
                           conta == null ? "NOVA CONTA" : "EDITAR CONTA",
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: theme.textTheme.titleMedium?.color,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 2,
                             fontSize: 14,
@@ -575,7 +617,7 @@ class ContasPagarScreen extends StatelessWidget {
                         const Spacer(),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
-                          child: Icon(Icons.close, color: Colors.white.withOpacity(0.4), size: 20),
+                          child: Icon(Icons.close, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4), size: 20),
                         ),
                       ],
                     ),
@@ -588,24 +630,24 @@ class ContasPagarScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _labelSection("INFORMAÇÕES GERAIS"),
+                          _labelSection(context, "INFORMAÇÕES GERAIS"),
                           const SizedBox(height: 10),
-                          _inputField(fornecedor, "Fornecedor", Icons.store_outlined),
+                          _inputField(context, fornecedor, "Fornecedor", Icons.store_outlined),
                           const SizedBox(height: 10),
-                          _inputField(descricao, "Descrição", Icons.description_outlined),
+                          _inputField(context, descricao, "Descrição", Icons.description_outlined),
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              Expanded(child: _inputField(numero, "Nº Documento", Icons.tag)),
+                              Expanded(child: _inputField(context, numero, "Nº Documento", Icons.tag)),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: _dropdownTipo(tipo, (v) => setState(() => tipo = v!)),
+                                child: _dropdownTipo(context, tipo, (v) => setState(() => tipo = v!)),
                               ),
                             ],
                           ),
 
                           const SizedBox(height: 20),
-                          _labelSection("DATAS"),
+                          _labelSection(context, "DATAS"),
                           const SizedBox(height: 10),
                           Row(
                             children: [
@@ -632,15 +674,16 @@ class ContasPagarScreen extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 20),
-                          _labelSection("VALORES"),
+                          _labelSection(context, "VALORES"),
                           const SizedBox(height: 10),
-                          _inputField(valor, "Valor (ex: 1000,50)", Icons.attach_money,
+                          _inputField(context, valor, "Valor (ex: 1000,50)", Icons.attach_money,
                               keyboardType: TextInputType.number),
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
                                 child: _inputField(
+                                  context,
                                   jurosMensal,
                                   "Juros Mensal (%)",
                                   Icons.trending_up,
@@ -653,21 +696,21 @@ class ContasPagarScreen extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0D1A0D),
+                                    color: theme.primaryColor.withOpacity(0.05),
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: const Color(0xFF1E3A1E)),
+                                    border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
-                                          const Icon(Icons.show_chart, size: 13, color: Color(0xFF4CAF50)),
+                                          Icon(Icons.show_chart, size: 13, color: theme.primaryColor),
                                           const SizedBox(width: 5),
                                           Text(
                                             "TAXA DIÁRIA",
                                             style: TextStyle(
-                                              color: Colors.white.withOpacity(0.4),
+                                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
                                               fontSize: 9,
                                               letterSpacing: 1.5,
                                             ),
@@ -677,8 +720,8 @@ class ContasPagarScreen extends StatelessWidget {
                                       const SizedBox(height: 4),
                                       Text(
                                         "${_taxaDiaria(jurosMensal.text).toStringAsFixed(4)}%",
-                                        style: const TextStyle(
-                                          color: Color(0xFF4CAF50),
+                                        style: TextStyle(
+                                          color: theme.primaryColor,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -686,7 +729,7 @@ class ContasPagarScreen extends StatelessWidget {
                                       Text(
                                         "ao dia",
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.3),
+                                          color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
                                           fontSize: 10,
                                         ),
                                       ),
@@ -697,7 +740,7 @@ class ContasPagarScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          _inputField(multaCtrl, "Multa (%)", Icons.gavel_outlined,
+                          _inputField(context, multaCtrl, "Multa (%)", Icons.gavel_outlined,
                               keyboardType: TextInputType.number),
                         ],
                       ),
@@ -707,8 +750,8 @@ class ContasPagarScreen extends StatelessWidget {
                   // Footer
                   Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
-                      border: Border(top: BorderSide(color: Color(0xFF1E1E1E))),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: theme.dividerColor)),
                     ),
                     child: Row(
                       children: [
@@ -718,15 +761,15 @@ class ContasPagarScreen extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1A1A1A),
+                                color: theme.dividerColor.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: const Color(0xFF2A2A2A)),
+                                border: Border.all(color: theme.dividerColor),
                               ),
-                              child: const Text(
+                              child: Text(
                                 "CANCELAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Colors.white54,
+                                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 1.5,
@@ -789,14 +832,14 @@ class ContasPagarScreen extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37),
+                                color: theme.primaryColor,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
                                 conta == null ? "SALVAR CONTA" : "ATUALIZAR",
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.black,
+                                style: TextStyle(
+                                  color: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
@@ -817,22 +860,23 @@ class ContasPagarScreen extends StatelessWidget {
     );
   }
 
-  Widget _labelSection(String label) {
+  Widget _labelSection(BuildContext context, String label) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Container(
           width: 2,
           height: 12,
           decoration: BoxDecoration(
-            color: const Color(0xFFD4AF37),
+            color: theme.primaryColor,
             borderRadius: BorderRadius.circular(1),
           ),
         ),
         const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFFD4AF37),
+          style: TextStyle(
+            color: theme.primaryColor,
             fontSize: 10,
             fontWeight: FontWeight.w700,
             letterSpacing: 2,
@@ -843,30 +887,32 @@ class ContasPagarScreen extends StatelessWidget {
   }
 
   Widget _inputField(
+      BuildContext context,
       TextEditingController ctrl,
       String label,
       IconData icon, {
         TextInputType keyboardType = TextInputType.text,
         void Function(String)? onChanged,
       }) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF161616),
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF2A2A2A)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: TextField(
         controller: ctrl,
         keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(
-            color: Colors.white.withOpacity(0.35),
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.35),
             fontSize: 12,
           ),
-          prefixIcon: Icon(icon, size: 16, color: const Color(0xFFD4AF37)),
+          prefixIcon: Icon(icon, size: 16, color: theme.primaryColor),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         ),
@@ -875,25 +921,27 @@ class ContasPagarScreen extends StatelessWidget {
   }
 
   Widget _dropdownTipo(
+      BuildContext context,
       TipoDocumento valor, void Function(TipoDocumento?) onChanged) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF161616),
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF2A2A2A)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<TipoDocumento>(
           value: valor,
-          dropdownColor: const Color(0xFF1A1A1A),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFFD4AF37), size: 18),
-          style: const TextStyle(color: Colors.white, fontSize: 13),
+          dropdownColor: theme.cardColor,
+          icon: Icon(Icons.keyboard_arrow_down, color: theme.primaryColor, size: 18),
+          style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13),
           items: TipoDocumento.values.map((t) {
             return DropdownMenuItem(
               value: t,
               child: Text(t.name,
-                  style: const TextStyle(color: Colors.white, fontSize: 13)),
+                  style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13)),
             );
           }).toList(),
           onChanged: onChanged,
@@ -909,6 +957,7 @@ class ContasPagarScreen extends StatelessWidget {
     required DateTime data,
     required void Function(DateTime) onPicked,
   }) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
@@ -917,11 +966,11 @@ class ContasPagarScreen extends StatelessWidget {
           firstDate: DateTime(2000),
           lastDate: DateTime(2100),
           builder: (ctx, child) => Theme(
-            data: ThemeData.dark().copyWith(
-              colorScheme: const ColorScheme.dark(
-                primary: Color(0xFFD4AF37),
-                onPrimary: Colors.black,
-                surface: Color(0xFF1A1A1A),
+            data: theme.copyWith(
+              colorScheme: theme.colorScheme.copyWith(
+                primary: theme.primaryColor,
+                onPrimary: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                surface: theme.cardColor,
               ),
             ),
             child: child!,
@@ -932,13 +981,13 @@ class ContasPagarScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF161616),
+          color: theme.scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF2A2A2A)),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: const Color(0xFFD4AF37)),
+            Icon(icon, size: 16, color: theme.primaryColor),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -947,13 +996,13 @@ class ContasPagarScreen extends StatelessWidget {
                   Text(
                     label,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.35),
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.35),
                       fontSize: 10,
                     ),
                   ),
                   Text(
                     "${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}",
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13),
                   ),
                 ],
               ),

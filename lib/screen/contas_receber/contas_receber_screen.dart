@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/conta_receber_controller.dart';
 import '../../model/conta_receber_model.dart';
+import '../../widgets/theme_toggle_button.dart';
 
 class ContasReceberScreen extends StatelessWidget {
   const ContasReceberScreen({super.key});
@@ -19,16 +20,18 @@ class ContasReceberScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<ContaReceberController>(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: Color(0xFF4FC3F7), size: 18),
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: theme.primaryColor, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -36,16 +39,15 @@ class ContasReceberScreen extends StatelessWidget {
             Container(
               width: 3,
               height: 22,
-              decoration: const BoxDecoration(
-                color: Color(0xFF4FC3F7),
-                borderRadius: BorderRadius.all(Radius.circular(2)),
+              decoration: BoxDecoration(
+                color: theme.primaryColor,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
             ),
             const SizedBox(width: 10),
-            const Text(
+            Text(
               "CONTAS A RECEBER",
-              style: TextStyle(
-                color: Colors.white,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontFamily: 'serif',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -55,16 +57,17 @@ class ContasReceberScreen extends StatelessWidget {
           ],
         ),
         actions: [
+          const ThemeToggleButton(),
           Container(
             margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF4FC3F7),
+              color: theme.primaryColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
               iconSize: 18,
-              icon: const Icon(Icons.add, color: Colors.black),
+              icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
               onPressed: () => _showDialog(context, controller),
             ),
           ),
@@ -77,18 +80,18 @@ class ContasReceberScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF161616),
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2A2A2A)),
+                border: Border.all(color: theme.dividerColor),
               ),
               child: TextField(
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: theme.textTheme.bodyMedium,
                 decoration: InputDecoration(
                   hintText: "Buscar cliente ou descrição...",
-                  hintStyle: TextStyle(
-                      color: Colors.white.withOpacity(0.3), fontSize: 14),
-                  prefixIcon: const Icon(Icons.search,
-                      color: Color(0xFF4FC3F7), size: 18),
+                  hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3)),
+                  prefixIcon: Icon(Icons.search,
+                      color: theme.primaryColor, size: 18),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -100,7 +103,7 @@ class ContasReceberScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── DASHBOARD ──
-          _dashboard(controller),
+          _dashboard(context, controller),
 
           const SizedBox(height: 20),
 
@@ -109,13 +112,13 @@ class ContasReceberScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                _filtroChip("Todas", FiltroStatus.todos, controller),
+                _filtroChip(context, "Todas", FiltroStatus.todos, controller),
                 const SizedBox(width: 8),
-                _filtroChip("A vencer", FiltroStatus.aVencer, controller),
+                _filtroChip(context, "A vencer", FiltroStatus.aVencer, controller),
                 const SizedBox(width: 8),
-                _filtroChip("Vencidas", FiltroStatus.vencidos, controller),
+                _filtroChip(context, "Vencidas", FiltroStatus.vencidos, controller),
                 const SizedBox(width: 8),
-                _filtroChip("Recebidas", FiltroStatus.pagos, controller),
+                _filtroChip(context, "Recebidas", FiltroStatus.pagos, controller),
               ],
             ),
           ),
@@ -130,13 +133,12 @@ class ContasReceberScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.receipt_long_outlined,
-                      color: Colors.white.withOpacity(0.15), size: 56),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.15), size: 56),
                   const SizedBox(height: 12),
                   Text(
                     "Nenhuma conta encontrada",
-                    style: TextStyle(
-                        color: Colors.white.withOpacity(0.3),
-                        fontSize: 14,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
                         letterSpacing: 1),
                   ),
                 ],
@@ -159,6 +161,7 @@ class ContasReceberScreen extends StatelessWidget {
   // ── CARD ──
   Widget _contaCard(BuildContext context, ContaReceber conta,
       ContaReceberController controller) {
+    final theme = Theme.of(context);
     final hoje = DateTime.now();
     final vencida = hoje.isAfter(conta.dataVencimento) &&
         conta.status != "Recebido";
@@ -168,7 +171,7 @@ class ContasReceberScreen extends StatelessWidget {
         ? const Color(0xFF4CAF50)
         : vencida
         ? const Color(0xFFE53935)
-        : const Color(0xFF4FC3F7);
+        : theme.primaryColor;
 
     String statusLabel = recebida
         ? "RECEBIDO"
@@ -179,9 +182,9 @@ class ContasReceberScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E1E)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         children: [
@@ -204,10 +207,8 @@ class ContasReceberScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     conta.descricao.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      fontSize: 13,
                       letterSpacing: 1.5,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -243,21 +244,22 @@ class ContasReceberScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _infoItem(Icons.person_outline, "Cliente", conta.cliente),
-                    _infoItem(Icons.description_outlined, "Documento",
+                    _infoItem(context, Icons.person_outline, "Cliente", conta.cliente),
+                    _infoItem(context, Icons.description_outlined, "Documento",
                         conta.numeroDocumento),
-                    _infoItem(Icons.category_outlined, "Tipo",
+                    _infoItem(context, Icons.category_outlined, "Tipo",
                         conta.tipoDocumento.name),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _infoItem(Icons.calendar_today_outlined, "Emissão",
+                    _infoItem(context, Icons.calendar_today_outlined, "Emissão",
                         _formatData(conta.dataEmissao)),
-                    _infoItem(Icons.event_outlined, "Vencimento",
+                    _infoItem(context, Icons.event_outlined, "Vencimento",
                         _formatData(conta.dataVencimento)),
                     _infoItem(
+                        context,
                         Icons.percent_outlined,
                         "Juros/Multa",
                         "${conta.juros.toStringAsFixed(1)}% / ${conta.multa.toStringAsFixed(1)}%"),
@@ -273,8 +275,8 @@ class ContasReceberScreen extends StatelessWidget {
                       children: [
                         Text(
                           "VALOR ATUALIZADO",
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
                             fontSize: 9,
                             letterSpacing: 1.5,
                           ),
@@ -291,9 +293,8 @@ class ContasReceberScreen extends StatelessWidget {
                         if (conta.valorAtualizado != conta.valorBoleto)
                           Text(
                             "Original: R\$ ${formatar(conta.valorBoleto)}",
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.3),
-                              fontSize: 11,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
                               decoration: TextDecoration.lineThrough,
                             ),
                           ),
@@ -303,10 +304,11 @@ class ContasReceberScreen extends StatelessWidget {
                       children: [
                         // Recalcular
                         _actionButton(
+                          context: context,
                           icon: Icons.refresh_rounded,
                           tooltip: "Recalcular",
-                          color: const Color(0xFF1E1E1E),
-                          iconColor: Colors.white60,
+                          color: theme.dividerColor,
+                          iconColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey,
                           onTap: () async {
                             conta.valorAtualizado =
                                 controller.calcularValorAtualizado(conta);
@@ -316,10 +318,11 @@ class ContasReceberScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         // Editar
                         _actionButton(
+                          context: context,
                           icon: Icons.edit_outlined,
                           tooltip: "Editar",
-                          color: const Color(0xFF0D1A2E),
-                          iconColor: const Color(0xFF4FC3F7),
+                          color: theme.primaryColor.withOpacity(0.1),
+                          iconColor: theme.primaryColor,
                           onTap: () =>
                               _showDialog(context, controller, conta: conta),
                         ),
@@ -327,9 +330,10 @@ class ContasReceberScreen extends StatelessWidget {
                         // Receber
                         if (!recebida)
                           _actionButton(
+                            context: context,
                             icon: Icons.check_rounded,
                             tooltip: "Marcar como Recebido",
-                            color: const Color(0xFF0A1F0A),
+                            color: const Color(0xFF4CAF50).withOpacity(0.1),
                             iconColor: const Color(0xFF4CAF50),
                             onTap: () async {
                               await controller.service
@@ -348,19 +352,20 @@ class ContasReceberScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoItem(IconData icon, String label, String value) {
+  Widget _infoItem(BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 11, color: const Color(0xFF4FC3F7)),
+              Icon(icon, size: 11, color: theme.primaryColor),
               const SizedBox(width: 4),
               Text(
                 label.toUpperCase(),
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.35),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.35),
                   fontSize: 9,
                   letterSpacing: 1,
                 ),
@@ -370,7 +375,7 @@ class ContasReceberScreen extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -379,6 +384,7 @@ class ContasReceberScreen extends StatelessWidget {
   }
 
   Widget _actionButton({
+    required BuildContext context,
     required IconData icon,
     required String tooltip,
     required Color color,
@@ -406,7 +412,8 @@ class ContasReceberScreen extends StatelessWidget {
 
   // ── FILTRO CHIP ──
   Widget _filtroChip(
-      String label, FiltroStatus filtro, ContaReceberController c) {
+      BuildContext context, String label, FiltroStatus filtro, ContaReceberController c) {
+    final theme = Theme.of(context);
     final selecionado = c.filtroAtual == filtro;
     return Expanded(
       child: GestureDetector(
@@ -416,20 +423,22 @@ class ContasReceberScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: selecionado
-                ? const Color(0xFF4FC3F7)
-                : const Color(0xFF161616),
+                ? theme.primaryColor
+                : theme.cardColor,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: selecionado
-                  ? const Color(0xFF4FC3F7)
-                  : const Color(0xFF2A2A2A),
+                  ? theme.primaryColor
+                  : theme.dividerColor,
             ),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: selecionado ? Colors.black : Colors.white54,
+              color: selecionado 
+                  ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
+                  : theme.textTheme.bodySmall?.color?.withOpacity(0.54),
               fontSize: 11,
               fontWeight:
               selecionado ? FontWeight.w700 : FontWeight.w400,
@@ -442,7 +451,7 @@ class ContasReceberScreen extends StatelessWidget {
   }
 
   // ── DASHBOARD ──
-  Widget _dashboard(ContaReceberController controller) {
+  Widget _dashboard(BuildContext context, ContaReceberController controller) {
     double total = 0, vencido = 0, aVencer = 0;
     final hoje = DateTime.now();
     for (var c in controller.contas) {
@@ -458,13 +467,13 @@ class ContasReceberScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
-          _dashCard("TOTAL", total, const Color(0xFF4FC3F7),
+          _dashCard(context, "TOTAL", total, Theme.of(context).primaryColor,
               Icons.account_balance_wallet_outlined),
           const SizedBox(width: 10),
-          _dashCard("VENCIDO", vencido, const Color(0xFFE53935),
+          _dashCard(context, "VENCIDO", vencido, const Color(0xFFE53935),
               Icons.warning_amber_outlined),
           const SizedBox(width: 10),
-          _dashCard("A RECEBER", aVencer, const Color(0xFF66BB6A),
+          _dashCard(context, "A RECEBER", aVencer, const Color(0xFF66BB6A),
               Icons.schedule_outlined),
         ],
       ),
@@ -472,12 +481,13 @@ class ContasReceberScreen extends StatelessWidget {
   }
 
   Widget _dashCard(
-      String titulo, double valor, Color cor, IconData icon) {
+      BuildContext context, String titulo, double valor, Color cor, IconData icon) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF111111),
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: cor.withOpacity(0.25)),
         ),
@@ -502,13 +512,12 @@ class ContasReceberScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               "R\$",
-              style: TextStyle(
-                  color: Colors.white.withOpacity(0.4), fontSize: 10),
+              style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.4), fontSize: 10),
             ),
             Text(
               formatar(valor),
-              style: const TextStyle(
-                color: Colors.white,
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
               ),
@@ -526,6 +535,7 @@ class ContasReceberScreen extends StatelessWidget {
   // ── DIALOG ──
   void _showDialog(BuildContext context, ContaReceberController controller,
       {ContaReceber? conta}) {
+    final theme = Theme.of(context);
     final cliente =
     TextEditingController(text: conta?.cliente ?? '');
     final descricao =
@@ -547,14 +557,14 @@ class ContasReceberScreen extends StatelessWidget {
     DateTime dataVencimento =
         conta?.dataVencimento ?? DateTime.now();
 
-    double _taxaDiaria(String mensal) {
+    double taxaDiaria(String mensal) {
       final m = double.tryParse(mensal.replaceAll(',', '.')) ?? 0;
       return m / 30;
     }
 
     showDialog(
       context: context,
-      barrierColor: Colors.black87,
+      barrierColor: Colors.black54,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(20),
@@ -562,9 +572,9 @@ class ContasReceberScreen extends StatelessWidget {
           builder: (context, setState) {
             return Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF111111),
+                color: theme.dialogBackgroundColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF2A2A2A)),
+                border: Border.all(color: theme.dividerColor),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -573,10 +583,10 @@ class ContasReceberScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 16),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
                           bottom:
-                          BorderSide(color: Color(0xFF1E1E1E))),
+                          BorderSide(color: theme.dividerColor)),
                     ),
                     child: Row(
                       children: [
@@ -584,7 +594,7 @@ class ContasReceberScreen extends StatelessWidget {
                           width: 3,
                           height: 18,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4FC3F7),
+                            color: theme.primaryColor,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -593,8 +603,7 @@ class ContasReceberScreen extends StatelessWidget {
                           conta == null
                               ? "NOVA CONTA"
                               : "EDITAR CONTA",
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                             letterSpacing: 2,
                             fontSize: 14,
@@ -604,7 +613,7 @@ class ContasReceberScreen extends StatelessWidget {
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
                           child: Icon(Icons.close,
-                              color: Colors.white.withOpacity(0.4),
+                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                               size: 20),
                         ),
                       ],
@@ -618,29 +627,29 @@ class ContasReceberScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _labelSection("INFORMAÇÕES GERAIS"),
+                          _labelSection(context, "INFORMAÇÕES GERAIS"),
                           const SizedBox(height: 10),
-                          _inputField(cliente, "Cliente",
+                          _inputField(context, cliente, "Cliente",
                               Icons.person_outline),
                           const SizedBox(height: 10),
-                          _inputField(descricao, "Descrição",
+                          _inputField(context, descricao, "Descrição",
                               Icons.description_outlined),
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
-                                  child: _inputField(numero,
+                                  child: _inputField(context, numero,
                                       "Nº Documento", Icons.tag)),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: _dropdownTipo(tipo,
+                                child: _dropdownTipo(context, tipo,
                                         (v) => setState(() => tipo = v!)),
                               ),
                             ],
                           ),
 
                           const SizedBox(height: 20),
-                          _labelSection("DATAS"),
+                          _labelSection(context, "DATAS"),
                           const SizedBox(height: 10),
                           Row(
                             children: [
@@ -669,9 +678,10 @@ class ContasReceberScreen extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 20),
-                          _labelSection("VALORES"),
+                          _labelSection(context, "VALORES"),
                           const SizedBox(height: 10),
                           _inputField(
+                              context,
                               valor, "Valor (ex: 1000,50)",
                               Icons.attach_money,
                               keyboardType: TextInputType.number),
@@ -680,6 +690,7 @@ class ContasReceberScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: _inputField(
+                                  context,
                                   jurosMensal,
                                   "Juros Mensal (%)",
                                   Icons.trending_up,
@@ -692,12 +703,12 @@ class ContasReceberScreen extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0D1A0D),
+                                    color: const Color(0xFF4CAF50).withOpacity(0.05),
                                     borderRadius:
                                     BorderRadius.circular(10),
                                     border: Border.all(
                                         color:
-                                        const Color(0xFF1E3A1E)),
+                                        const Color(0xFF4CAF50).withOpacity(0.2)),
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -712,9 +723,8 @@ class ContasReceberScreen extends StatelessWidget {
                                           const SizedBox(width: 5),
                                           Text(
                                             "TAXA DIÁRIA",
-                                            style: TextStyle(
-                                              color: Colors.white
-                                                  .withOpacity(0.4),
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
                                               fontSize: 9,
                                               letterSpacing: 1.5,
                                             ),
@@ -723,7 +733,7 @@ class ContasReceberScreen extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "${_taxaDiaria(jurosMensal.text).toStringAsFixed(4)}%",
+                                        "${taxaDiaria(jurosMensal.text).toStringAsFixed(4)}%",
                                         style: const TextStyle(
                                           color: Color(0xFF4CAF50),
                                           fontSize: 16,
@@ -732,9 +742,8 @@ class ContasReceberScreen extends StatelessWidget {
                                       ),
                                       Text(
                                         "ao dia",
-                                        style: TextStyle(
-                                          color: Colors.white
-                                              .withOpacity(0.3),
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
                                           fontSize: 10,
                                         ),
                                       ),
@@ -745,7 +754,7 @@ class ContasReceberScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          _inputField(multaCtrl, "Multa (%)",
+                          _inputField(context, multaCtrl, "Multa (%)",
                               Icons.gavel_outlined,
                               keyboardType: TextInputType.number),
                         ],
@@ -756,9 +765,9 @@ class ContasReceberScreen extends StatelessWidget {
                   // Footer
                   Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
-                          top: BorderSide(color: Color(0xFF1E1E1E))),
+                          top: BorderSide(color: theme.dividerColor)),
                     ),
                     child: Row(
                       children: [
@@ -769,16 +778,16 @@ class ContasReceberScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   vertical: 14),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1A1A1A),
+                                color: theme.dividerColor.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                    color: const Color(0xFF2A2A2A)),
+                                    color: theme.dividerColor),
                               ),
-                              child: const Text(
+                              child: Text(
                                 "CANCELAR",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white54,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.54),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 1.5,
@@ -845,7 +854,7 @@ class ContasReceberScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   vertical: 14),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF4FC3F7),
+                                color: theme.primaryColor,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -853,8 +862,8 @@ class ContasReceberScreen extends StatelessWidget {
                                     ? "SALVAR CONTA"
                                     : "ATUALIZAR",
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.black,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onPrimary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
@@ -875,22 +884,23 @@ class ContasReceberScreen extends StatelessWidget {
     );
   }
 
-  Widget _labelSection(String label) {
+  Widget _labelSection(BuildContext context, String label) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Container(
           width: 2,
           height: 12,
           decoration: BoxDecoration(
-            color: const Color(0xFF4FC3F7),
+            color: theme.primaryColor,
             borderRadius: BorderRadius.circular(1),
           ),
         ),
         const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF4FC3F7),
+          style: TextStyle(
+            color: theme.primaryColor,
             fontSize: 10,
             fontWeight: FontWeight.w700,
             letterSpacing: 2,
@@ -901,31 +911,33 @@ class ContasReceberScreen extends StatelessWidget {
   }
 
   Widget _inputField(
+      BuildContext context,
       TextEditingController ctrl,
       String label,
       IconData icon, {
         TextInputType keyboardType = TextInputType.text,
         void Function(String)? onChanged,
       }) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF161616),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF2A2A2A)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: TextField(
         controller: ctrl,
         keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: theme.textTheme.bodyMedium,
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(
-            color: Colors.white.withOpacity(0.35),
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.35),
             fontSize: 12,
           ),
           prefixIcon:
-          Icon(icon, size: 16, color: const Color(0xFF4FC3F7)),
+          Icon(icon, size: 16, color: theme.primaryColor),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
               vertical: 14, horizontal: 12),
@@ -935,28 +947,29 @@ class ContasReceberScreen extends StatelessWidget {
   }
 
   Widget _dropdownTipo(
+      BuildContext context,
       TipoDocumento valor, void Function(TipoDocumento?) onChanged) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF161616),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF2A2A2A)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<TipoDocumento>(
           value: valor,
-          dropdownColor: const Color(0xFF1A1A1A),
-          icon: const Icon(Icons.keyboard_arrow_down,
-              color: Color(0xFF4FC3F7), size: 18),
+          dropdownColor: theme.cardColor,
+          icon: Icon(Icons.keyboard_arrow_down,
+              color: theme.primaryColor, size: 18),
           style:
-          const TextStyle(color: Colors.white, fontSize: 13),
+          theme.textTheme.bodySmall?.copyWith(fontSize: 13),
           items: TipoDocumento.values.map((t) {
             return DropdownMenuItem(
               value: t,
               child: Text(t.name,
-                  style: const TextStyle(
-                      color: Colors.white, fontSize: 13)),
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 13)),
             );
           }).toList(),
           onChanged: onChanged,
@@ -972,6 +985,7 @@ class ContasReceberScreen extends StatelessWidget {
     required DateTime data,
     required void Function(DateTime) onPicked,
   }) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
@@ -980,11 +994,11 @@ class ContasReceberScreen extends StatelessWidget {
           firstDate: DateTime(2000),
           lastDate: DateTime(2100),
           builder: (ctx, child) => Theme(
-            data: ThemeData.dark().copyWith(
-              colorScheme: const ColorScheme.dark(
-                primary: Color(0xFF4FC3F7),
-                onPrimary: Colors.black,
-                surface: Color(0xFF1A1A1A),
+            data: theme.copyWith(
+              colorScheme: theme.colorScheme.copyWith(
+                primary: theme.primaryColor,
+                onPrimary: theme.colorScheme.onPrimary,
+                surface: theme.cardColor,
               ),
             ),
             child: child!,
@@ -996,13 +1010,13 @@ class ContasReceberScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF161616),
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF2A2A2A)),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: const Color(0xFF4FC3F7)),
+            Icon(icon, size: 16, color: theme.primaryColor),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -1011,14 +1025,13 @@ class ContasReceberScreen extends StatelessWidget {
                   Text(
                     label,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.35),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.35),
                       fontSize: 10,
                     ),
                   ),
                   Text(
                     "${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}",
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 13),
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 13),
                   ),
                 ],
               ),

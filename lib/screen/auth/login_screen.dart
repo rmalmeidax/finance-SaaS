@@ -2,9 +2,8 @@ import 'package:finance/screen/auth/forgot_password_screen.dart';
 import 'package:finance/screen/auth/register_screen.dart';
 import 'package:finance/widgets/custom_input_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import '../home/home_screen.dart';
+import 'package:provider/provider.dart';
+import '../../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,7 +16,6 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final emailController = TextEditingController();
   final senhaController = TextEditingController();
-  final auth = FirebaseAuth.instance;
 
   bool loading = false;
   late AnimationController _animController;
@@ -56,15 +54,11 @@ class _LoginScreenState extends State<LoginScreen>
     }
     try {
       setState(() => loading = true);
-      await auth.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: senhaController.text.trim(),
+      await context.read<AuthService>().login(
+        emailController.text.trim(),
+        senhaController.text.trim(),
       );
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      // O Consumer no main.dart cuidará da navegação para a HomeScreen
     } catch (e) {
       if (!mounted) return;
       _showSnack("Email ou senha incorretos");

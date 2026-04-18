@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/clientes_controller.dart';
 import '../../model/clientes_model.dart';
+import '../../widgets/theme_toggle_button.dart';
 
 
 
@@ -13,16 +14,18 @@ class ClienteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<ClienteController>(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: Color(0xFF26A69A), size: 18),
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: theme.primaryColor, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -30,16 +33,17 @@ class ClienteScreen extends StatelessWidget {
             Container(
               width: 3,
               height: 22,
-              decoration: const BoxDecoration(
-                color: Color(0xFF26A69A),
-                borderRadius: BorderRadius.all(Radius.circular(2)),
+              decoration: BoxDecoration(
+                color: theme.primaryColor,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
             ),
             const SizedBox(width: 10),
-            const Text(
+            Text(
               "CLIENTES",
               style: TextStyle(
-                color: Colors.white,
+                color: theme.textTheme.titleLarge?.color,
+                fontFamily: 'serif',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 3,
@@ -48,16 +52,17 @@ class ClienteScreen extends StatelessWidget {
           ],
         ),
         actions: [
+          const ThemeToggleButton(),
           Container(
             margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF26A69A),
+              color: theme.primaryColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
               iconSize: 18,
-              icon: const Icon(Icons.add, color: Colors.black),
+              icon: Icon(Icons.add, color: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white),
               onPressed: () => _showDialog(context, controller),
             ),
           ),
@@ -70,18 +75,18 @@ class ClienteScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF161616),
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2A2A2A)),
+                border: Border.all(color: theme.dividerColor),
               ),
               child: TextField(
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: "Buscar por nome, fantasia ou documento...",
                   hintStyle: TextStyle(
-                      color: Colors.white.withOpacity(0.3), fontSize: 14),
-                  prefixIcon: const Icon(Icons.search,
-                      color: Color(0xFF26A69A), size: 18),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3), fontSize: 14),
+                  prefixIcon: Icon(Icons.search,
+                      color: theme.primaryColor, size: 18),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -93,7 +98,7 @@ class ClienteScreen extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ── DASHBOARD ──
-          _dashboard(controller),
+          _dashboard(context, controller),
 
           const SizedBox(height: 16),
 
@@ -103,14 +108,14 @@ class ClienteScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                _chip("Todos", controller.filtroTipo == FiltroTipoCliente.todos,
+                _chip(context, "Todos", controller.filtroTipo == FiltroTipoCliente.todos,
                         () => controller.setFiltroTipo(FiltroTipoCliente.todos)),
                 const SizedBox(width: 8),
-                _chip("Pessoa Jurídica",
+                _chip(context, "Pessoa Jurídica",
                     controller.filtroTipo == FiltroTipoCliente.pj,
                         () => controller.setFiltroTipo(FiltroTipoCliente.pj)),
                 const SizedBox(width: 8),
-                _chip("Pessoa Física",
+                _chip(context, "Pessoa Física",
                     controller.filtroTipo == FiltroTipoCliente.pf,
                         () => controller.setFiltroTipo(FiltroTipoCliente.pf)),
               ],
@@ -126,6 +131,7 @@ class ClienteScreen extends StatelessWidget {
             child: Row(
               children: [
                 _chipColor(
+                  context,
                   "Ativo",
                   controller.filtroStatus == FiltroStatusCliente.ativo,
                   const Color(0xFF4CAF50),
@@ -134,6 +140,7 @@ class ClienteScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 _chipColor(
+                  context,
                   "Inativo",
                   controller.filtroStatus == FiltroStatusCliente.inativo,
                   const Color(0xFFE53935),
@@ -154,12 +161,12 @@ class ClienteScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.people_outline,
-                      color: Colors.white.withOpacity(0.12), size: 60),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.12), size: 60),
                   const SizedBox(height: 12),
                   Text(
                     "Nenhum cliente encontrado",
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.3),
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
                         fontSize: 14,
                         letterSpacing: 1),
                   ),
@@ -179,7 +186,8 @@ class ClienteScreen extends StatelessWidget {
   }
 
   // ── DASHBOARD ──
-  Widget _dashboard(ClienteController controller) {
+  Widget _dashboard(BuildContext context, ClienteController controller) {
+    final theme = Theme.of(context);
     final total = controller.clientes.length;
     final ativos =
         controller.clientes.where((c) => c.status == 'Ativo').length;
@@ -187,62 +195,85 @@ class ClienteScreen extends StatelessWidget {
         .where((c) => c.tipoPessoa == TipoPessoaCliente.juridica)
         .length;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          _dashCard("TOTAL", "$total", const Color(0xFF26A69A),
-              Icons.people_outline),
-          const SizedBox(width: 10),
-          _dashCard("ATIVOS", "$ativos", const Color(0xFF4CAF50),
-              Icons.check_circle_outline),
-          const SizedBox(width: 10),
-          _dashCard(
-              "PJ", "$pj", const Color(0xFF4FC3F7), Icons.business_outlined),
-        ],
-      ),
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      final isMobile = constraints.maxWidth < 500;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: isMobile
+            ? Column(
+                children: [
+                  _dashCard(context, "TOTAL", "$total", theme.primaryColor, Icons.people_outline, isFullWidth: true),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _dashCard(context, "ATIVOS", "$ativos", const Color(0xFF4CAF50), Icons.check_circle_outline),
+                      const SizedBox(width: 10),
+                      _dashCard(context, "PJ", "$pj", const Color(0xFF4FC3F7), Icons.business_outlined),
+                    ],
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  _dashCard(context, "TOTAL", "$total", theme.primaryColor, Icons.people_outline),
+                  const SizedBox(width: 10),
+                  _dashCard(context, "ATIVOS", "$ativos", const Color(0xFF4CAF50), Icons.check_circle_outline),
+                  const SizedBox(width: 10),
+                  _dashCard(context, "PJ", "$pj", const Color(0xFF4FC3F7), Icons.business_outlined),
+                ],
+              ),
+      );
+    });
   }
 
-  Widget _dashCard(String titulo, String valor, Color cor, IconData icon) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFF111111),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: cor.withOpacity(0.25)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 13, color: cor),
-                const SizedBox(width: 5),
-                Text(titulo,
-                    style: TextStyle(
-                        color: cor,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.5)),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(valor,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800)),
+  Widget _dashCard(BuildContext context, String titulo, String valor, Color cor, IconData icon, {bool isFullWidth = false}) {
+    final theme = Theme.of(context);
+    final card = Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cor.withOpacity(0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: cor.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 13, color: cor),
+              const SizedBox(width: 5),
+              Text(titulo,
+                  style: TextStyle(
+                      color: cor,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5)),
           ],
         ),
-      ),
-    );
-  }
+        const SizedBox(height: 6),
+        Text(valor,
+            style: TextStyle(
+                color: theme.textTheme.bodyMedium?.color,
+                fontSize: 22,
+                fontWeight: FontWeight.w800)),
+      ],
+    ),
+  );
+
+  return isFullWidth ? card : Expanded(child: card);
+}
 
   // ── CARD ──
   Widget _clienteCard(
       BuildContext context, Cliente c, ClienteController controller) {
+    final theme = Theme.of(context);
     final isPj = c.tipoPessoa == TipoPessoaCliente.juridica;
     final isAtivo = c.status == 'Ativo';
     final statusColor =
@@ -253,9 +284,9 @@ class ClienteScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E1E)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         children: [
@@ -264,13 +295,13 @@ class ClienteScreen extends StatelessWidget {
             padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF26A69A).withOpacity(0.05),
+              color: theme.primaryColor.withOpacity(0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
-              border: const Border(
-                  bottom: BorderSide(color: Color(0xFF1E1E1E))),
+              border: Border(
+                  bottom: BorderSide(color: theme.dividerColor)),
             ),
             child: Row(
               children: [
@@ -278,14 +309,14 @@ class ClienteScreen extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF26A69A).withOpacity(0.12),
+                    color: theme.primaryColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
                     child: Text(
                       c.nome.isNotEmpty ? c.nome[0].toUpperCase() : '?',
-                      style: const TextStyle(
-                          color: Color(0xFF26A69A),
+                      style: TextStyle(
+                          color: theme.primaryColor,
                           fontSize: 16,
                           fontWeight: FontWeight.w800),
                     ),
@@ -298,8 +329,8 @@ class ClienteScreen extends StatelessWidget {
                     children: [
                       Text(
                         c.nome.toUpperCase(),
-                        style: const TextStyle(
-                            color: Colors.white,
+                        style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                             letterSpacing: 0.5),
@@ -308,7 +339,7 @@ class ClienteScreen extends StatelessWidget {
                       if (c.fantasia.isNotEmpty)
                         Text(c.fantasia,
                             style: TextStyle(
-                                color: Colors.white.withOpacity(0.4),
+                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                                 fontSize: 11)),
                     ],
                   ),
@@ -353,11 +384,11 @@ class ClienteScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _infoItem(Icons.badge_outlined, isPj ? "CNPJ" : "CPF",
+                    _infoItem(context, Icons.badge_outlined, isPj ? "CNPJ" : "CPF",
                         c.documento),
-                    _infoItem(Icons.phone_outlined, "Telefone",
+                    _infoItem(context, Icons.phone_outlined, "Telefone",
                         c.telefone.isEmpty ? '—' : c.telefone),
-                    _infoItem(Icons.email_outlined, "E-mail",
+                    _infoItem(context, Icons.email_outlined, "E-mail",
                         c.email.isEmpty ? '—' : c.email),
                   ],
                 ),
@@ -366,12 +397,13 @@ class ClienteScreen extends StatelessWidget {
                   Row(
                     children: [
                       _infoItem(
+                          context,
                           Icons.location_on_outlined,
                           "Cidade / UF",
                           "${c.cidade}${c.estado.isNotEmpty ? ' - ${c.estado}' : ''}"),
-                      _infoItem(Icons.map_outlined, "Bairro",
+                      _infoItem(context, Icons.map_outlined, "Bairro",
                           c.bairro.isEmpty ? '—' : c.bairro),
-                      _infoItem(Icons.markunread_mailbox_outlined, "CEP",
+                      _infoItem(context, Icons.markunread_mailbox_outlined, "CEP",
                           c.cep.isEmpty ? '—' : c.cep),
                     ],
                   ),
@@ -383,8 +415,8 @@ class ClienteScreen extends StatelessWidget {
                     _actionButton(
                       icon: Icons.edit_outlined,
                       tooltip: "Editar",
-                      color: const Color(0xFF0D1A2E),
-                      iconColor: const Color(0xFF4FC3F7),
+                      color: theme.primaryColor.withOpacity(0.1),
+                      iconColor: theme.primaryColor,
                       onTap: () =>
                           _showDialog(context, controller, cliente: c),
                     ),
@@ -395,8 +427,8 @@ class ClienteScreen extends StatelessWidget {
                           : Icons.toggle_off_outlined,
                       tooltip: isAtivo ? "Inativar" : "Ativar",
                       color: isAtivo
-                          ? const Color(0xFF1A0D0D)
-                          : const Color(0xFF0A1F0A),
+                          ? const Color(0xFFE53935).withOpacity(0.1)
+                          : const Color(0xFF4CAF50).withOpacity(0.1),
                       iconColor: isAtivo
                           ? const Color(0xFFE53935)
                           : const Color(0xFF4CAF50),
@@ -407,8 +439,8 @@ class ClienteScreen extends StatelessWidget {
                     _actionButton(
                       icon: Icons.delete_outline,
                       tooltip: "Excluir",
-                      color: const Color(0xFF1A0D0D),
-                      iconColor: Colors.red.withOpacity(0.6),
+                      color: Colors.red.withOpacity(0.1),
+                      iconColor: Colors.red,
                       onTap: () => _confirmDelete(context, c, controller),
                     ),
                   ],
@@ -421,25 +453,26 @@ class ClienteScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoItem(IconData icon, String label, String value) {
+  Widget _infoItem(BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 11, color: const Color(0xFF26A69A)),
+              Icon(icon, size: 11, color: theme.primaryColor),
               const SizedBox(width: 4),
               Text(label,
                   style: TextStyle(
-                      color: Colors.white.withOpacity(0.35),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.35),
                       fontSize: 9,
                       letterSpacing: 1)),
             ],
           ),
           const SizedBox(height: 3),
           Text(value,
-              style: const TextStyle(color: Colors.white, fontSize: 12),
+              style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12),
               overflow: TextOverflow.ellipsis),
         ],
       ),
@@ -472,7 +505,8 @@ class ClienteScreen extends StatelessWidget {
     );
   }
 
-  Widget _chip(String label, bool selected, VoidCallback onTap) {
+  Widget _chip(BuildContext context, String label, bool selected, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -480,16 +514,16 @@ class ClienteScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color:
-          selected ? const Color(0xFF26A69A) : const Color(0xFF161616),
+          selected ? theme.primaryColor : theme.cardColor,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
               color: selected
-                  ? const Color(0xFF26A69A)
-                  : const Color(0xFF2A2A2A)),
+                  ? theme.primaryColor
+                  : theme.dividerColor),
         ),
         child: Text(label,
             style: TextStyle(
-                color: selected ? Colors.black : Colors.white54,
+                color: selected ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
                 fontSize: 11,
                 fontWeight:
                 selected ? FontWeight.w700 : FontWeight.w400,
@@ -499,21 +533,22 @@ class ClienteScreen extends StatelessWidget {
   }
 
   Widget _chipColor(
-      String label, bool selected, Color cor, VoidCallback onTap) {
+      BuildContext context, String label, bool selected, Color cor, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? cor : const Color(0xFF161616),
+          color: selected ? cor : theme.cardColor,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-              color: selected ? cor : const Color(0xFF2A2A2A)),
+              color: selected ? cor : theme.dividerColor),
         ),
         child: Text(label,
             style: TextStyle(
-                color: selected ? Colors.black : Colors.white54,
+                color: selected ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
                 fontSize: 11,
                 fontWeight:
                 selected ? FontWeight.w700 : FontWeight.w400)),
@@ -524,11 +559,12 @@ class ClienteScreen extends StatelessWidget {
   // ── CONFIRM DELETE ──
   void _confirmDelete(
       BuildContext context, Cliente c, ClienteController controller) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       barrierColor: Colors.black87,
       builder: (_) => Dialog(
-        backgroundColor: const Color(0xFF111111),
+        backgroundColor: theme.scaffoldBackgroundColor,
         shape:
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
@@ -539,16 +575,16 @@ class ClienteScreen extends StatelessWidget {
               const Icon(Icons.warning_amber_rounded,
                   color: Color(0xFFE53935), size: 40),
               const SizedBox(height: 12),
-              const Text("Excluir Cliente",
+              Text("Excluir Cliente",
                   style: TextStyle(
-                      color: Colors.white,
+                      color: theme.textTheme.bodyMedium?.color,
                       fontSize: 16,
                       fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Text("Tem certeza que deseja excluir ${c.nome}?",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: Colors.white.withOpacity(0.5), fontSize: 13)),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 13)),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -559,15 +595,15 @@ class ClienteScreen extends StatelessWidget {
                         padding:
                         const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1A1A1A),
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                              color: const Color(0xFF2A2A2A)),
+                              color: theme.dividerColor),
                         ),
-                        child: const Text("CANCELAR",
+                        child: Text("CANCELAR",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Colors.white54,
+                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1)),
@@ -610,6 +646,7 @@ class ClienteScreen extends StatelessWidget {
   // ── DIALOG ──
   void _showDialog(BuildContext context, ClienteController controller,
       {Cliente? cliente}) {
+    final theme = Theme.of(context);
     final docCtrl =
     TextEditingController(text: cliente?.documento ?? '');
     final nomeCtrl = TextEditingController(text: cliente?.nome ?? '');
@@ -671,9 +708,9 @@ class ClienteScreen extends StatelessWidget {
 
           return Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF111111),
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF2A2A2A)),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -682,9 +719,9 @@ class ClienteScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
-                        bottom: BorderSide(color: Color(0xFF1E1E1E))),
+                        bottom: BorderSide(color: theme.dividerColor)),
                   ),
                   child: Row(
                     children: [
@@ -692,7 +729,7 @@ class ClienteScreen extends StatelessWidget {
                         width: 3,
                         height: 18,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF26A69A),
+                          color: theme.primaryColor,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -701,8 +738,8 @@ class ClienteScreen extends StatelessWidget {
                         cliente == null
                             ? "NOVO CLIENTE"
                             : "EDITAR CLIENTE",
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 2,
                           fontSize: 14,
@@ -712,7 +749,7 @@ class ClienteScreen extends StatelessWidget {
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Icon(Icons.close,
-                            color: Colors.white.withOpacity(0.4),
+                            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                             size: 20),
                       ),
                     ],
@@ -726,7 +763,7 @@ class ClienteScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _labelSection("TIPO DE PESSOA"),
+                        _labelSection(context, "TIPO DE PESSOA"),
                         const SizedBox(height: 10),
                         Row(
                           children: [
@@ -745,15 +782,15 @@ class ClienteScreen extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color: tipo ==
                                         TipoPessoaCliente.juridica
-                                        ? const Color(0xFF26A69A)
-                                        : const Color(0xFF161616),
+                                        ? theme.primaryColor
+                                        : theme.scaffoldBackgroundColor,
                                     borderRadius:
                                     BorderRadius.circular(10),
                                     border: Border.all(
                                       color: tipo ==
                                           TipoPessoaCliente.juridica
-                                          ? const Color(0xFF26A69A)
-                                          : const Color(0xFF2A2A2A),
+                                          ? theme.primaryColor
+                                          : theme.dividerColor,
                                     ),
                                   ),
                                   child: Row(
@@ -765,8 +802,8 @@ class ClienteScreen extends StatelessWidget {
                                           color: tipo ==
                                               TipoPessoaCliente
                                                   .juridica
-                                              ? Colors.black
-                                              : Colors.white54),
+                                              ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
+                                              : theme.textTheme.bodyMedium?.color?.withOpacity(0.54)),
                                       const SizedBox(width: 6),
                                       Text(
                                         "Pessoa Jurídica",
@@ -774,8 +811,8 @@ class ClienteScreen extends StatelessWidget {
                                             color: tipo ==
                                                 TipoPessoaCliente
                                                     .juridica
-                                                ? Colors.black
-                                                : Colors.white54,
+                                                ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
+                                                : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
                                             fontWeight: FontWeight.w700,
                                             fontSize: 12),
                                       ),
@@ -801,14 +838,14 @@ class ClienteScreen extends StatelessWidget {
                                     color:
                                     tipo == TipoPessoaCliente.fisica
                                         ? const Color(0xFFFFB74D)
-                                        : const Color(0xFF161616),
+                                        : theme.scaffoldBackgroundColor,
                                     borderRadius:
                                     BorderRadius.circular(10),
                                     border: Border.all(
                                       color: tipo ==
                                           TipoPessoaCliente.fisica
                                           ? const Color(0xFFFFB74D)
-                                          : const Color(0xFF2A2A2A),
+                                          : theme.dividerColor,
                                     ),
                                   ),
                                   child: Row(
@@ -820,8 +857,8 @@ class ClienteScreen extends StatelessWidget {
                                           color: tipo ==
                                               TipoPessoaCliente
                                                   .fisica
-                                              ? Colors.black
-                                              : Colors.white54),
+                                              ? Colors.white
+                                              : theme.textTheme.bodyMedium?.color?.withOpacity(0.54)),
                                       const SizedBox(width: 6),
                                       Text(
                                         "Pessoa Física",
@@ -829,8 +866,8 @@ class ClienteScreen extends StatelessWidget {
                                             color: tipo ==
                                                 TipoPessoaCliente
                                                     .fisica
-                                                ? Colors.black
-                                                : Colors.white54,
+                                                ? Colors.white
+                                                : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
                                             fontWeight: FontWeight.w700,
                                             fontSize: 12),
                                       ),
@@ -843,7 +880,7 @@ class ClienteScreen extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 20),
-                        _labelSection(tipo == TipoPessoaCliente.juridica
+                        _labelSection(context, tipo == TipoPessoaCliente.juridica
                             ? "CNPJ"
                             : "CPF"),
                         const SizedBox(height: 10),
@@ -852,6 +889,7 @@ class ClienteScreen extends StatelessWidget {
                           children: [
                             Expanded(
                               child: _inputField(
+                                context,
                                 docCtrl,
                                 tipo == TipoPessoaCliente.juridica
                                     ? "Digite o CNPJ"
@@ -868,19 +906,19 @@ class ClienteScreen extends StatelessWidget {
                                   height: 50,
                                   width: 50,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF26A69A),
+                                    color: theme.primaryColor,
                                     borderRadius:
                                     BorderRadius.circular(10),
                                   ),
                                   child: buscando
-                                      ? const Padding(
-                                    padding: EdgeInsets.all(13),
+                                      ? Padding(
+                                    padding: const EdgeInsets.all(13),
                                     child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.black),
+                                        color: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white),
                                   )
-                                      : const Icon(Icons.search,
-                                      color: Colors.black, size: 20),
+                                      : Icon(Icons.search,
+                                      color: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white, size: 20),
                                 ),
                               ),
                             ],
@@ -920,22 +958,22 @@ class ClienteScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0D1520),
+                              color: theme.primaryColor.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                  color: const Color(0xFF26A69A)
+                                  color: theme.primaryColor
                                       .withOpacity(0.2)),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.info_outline,
-                                    color: Color(0xFF26A69A), size: 14),
+                                Icon(Icons.info_outline,
+                                    color: theme.primaryColor, size: 14),
                                 const SizedBox(width: 8),
-                                const Expanded(
+                                Expanded(
                                   child: Text(
                                     "Digite o CNPJ e clique em 🔍 para buscar os dados na Receita Federal automaticamente.",
                                     style: TextStyle(
-                                        color: Color(0xFF26A69A),
+                                        color: theme.primaryColor,
                                         fontSize: 11),
                                   ),
                                 ),
@@ -947,9 +985,10 @@ class ClienteScreen extends StatelessWidget {
                         if (tipo == TipoPessoaCliente.fisica ||
                             dadosCarregados) ...[
                           const SizedBox(height: 20),
-                          _labelSection("INFORMAÇÕES GERAIS"),
+                          _labelSection(context, "INFORMAÇÕES GERAIS"),
                           const SizedBox(height: 10),
                           _inputField(
+                              context,
                               nomeCtrl,
                               tipo == TipoPessoaCliente.juridica
                                   ? "Razão Social"
@@ -957,20 +996,20 @@ class ClienteScreen extends StatelessWidget {
                               Icons.person_outline),
                           if (tipo == TipoPessoaCliente.juridica) ...[
                             const SizedBox(height: 10),
-                            _inputField(fantasiaCtrl, "Nome Fantasia",
+                            _inputField(context, fantasiaCtrl, "Nome Fantasia",
                                 Icons.storefront_outlined),
                           ],
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
-                                child: _inputField(telefoneCtrl, "Telefone",
+                                child: _inputField(context, telefoneCtrl, "Telefone",
                                     Icons.phone_outlined,
                                     keyboardType: TextInputType.phone),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: _inputField(emailCtrl, "E-mail",
+                                child: _inputField(context, emailCtrl, "E-mail",
                                     Icons.email_outlined,
                                     keyboardType:
                                     TextInputType.emailAddress),
@@ -979,20 +1018,20 @@ class ClienteScreen extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 20),
-                          _labelSection("ENDEREÇO"),
+                          _labelSection(context, "ENDEREÇO"),
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
                                 flex: 2,
-                                child: _inputField(cepCtrl, "CEP",
+                                child: _inputField(context, cepCtrl, "CEP",
                                     Icons.markunread_mailbox_outlined,
                                     keyboardType: TextInputType.number),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 3,
-                                child: _inputField(logradouroCtrl,
+                                child: _inputField(context, logradouroCtrl,
                                     "Logradouro",
                                     Icons.signpost_outlined),
                               ),
@@ -1003,12 +1042,12 @@ class ClienteScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: _inputField(
-                                    numeroCtrl, "Número", Icons.tag),
+                                    context, numeroCtrl, "Número", Icons.tag),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 2,
-                                child: _inputField(complementoCtrl,
+                                child: _inputField(context, complementoCtrl,
                                     "Complemento", Icons.home_outlined),
                               ),
                             ],
@@ -1017,19 +1056,19 @@ class ClienteScreen extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: _inputField(bairroCtrl, "Bairro",
+                                child: _inputField(context, bairroCtrl, "Bairro",
                                     Icons.map_outlined),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 2,
-                                child: _inputField(cidadeCtrl, "Cidade",
+                                child: _inputField(context, cidadeCtrl, "Cidade",
                                     Icons.location_city_outlined),
                               ),
                               const SizedBox(width: 10),
                               SizedBox(
                                 width: 60,
-                                child: _inputField(estadoCtrl, "UF",
+                                child: _inputField(context, estadoCtrl, "UF",
                                     Icons.flag_outlined),
                               ),
                             ],
@@ -1043,9 +1082,9 @@ class ClienteScreen extends StatelessWidget {
                 // Footer
                 Container(
                   padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
-                        top: BorderSide(color: Color(0xFF1E1E1E))),
+                        top: BorderSide(color: theme.dividerColor)),
                   ),
                   child: Row(
                     children: [
@@ -1056,15 +1095,15 @@ class ClienteScreen extends StatelessWidget {
                             padding:
                             const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1A1A1A),
+                              color: theme.scaffoldBackgroundColor,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                  color: const Color(0xFF2A2A2A)),
+                                  color: theme.dividerColor),
                             ),
-                            child: const Text("CANCELAR",
+                            child: Text("CANCELAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.white54,
+                                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 1.5)),
@@ -1103,7 +1142,7 @@ class ClienteScreen extends StatelessWidget {
                             padding:
                             const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF26A69A),
+                              color: theme.primaryColor,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -1111,8 +1150,8 @@ class ClienteScreen extends StatelessWidget {
                                   ? "SALVAR CLIENTE"
                                   : "ATUALIZAR",
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.black,
+                              style: TextStyle(
+                                  color: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5),
@@ -1131,21 +1170,22 @@ class ClienteScreen extends StatelessWidget {
     );
   }
 
-  Widget _labelSection(String label) {
+  Widget _labelSection(BuildContext context, String label) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Container(
           width: 2,
           height: 12,
           decoration: BoxDecoration(
-            color: const Color(0xFF26A69A),
+            color: theme.primaryColor,
             borderRadius: BorderRadius.circular(1),
           ),
         ),
         const SizedBox(width: 8),
         Text(label,
-            style: const TextStyle(
-                color: Color(0xFF26A69A),
+            style: TextStyle(
+                color: theme.primaryColor,
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 2)),
@@ -1154,27 +1194,29 @@ class ClienteScreen extends StatelessWidget {
   }
 
   Widget _inputField(
+      BuildContext context,
       TextEditingController ctrl,
       String label,
       IconData icon, {
         TextInputType keyboardType = TextInputType.text,
       }) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF161616),
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF2A2A2A)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: TextField(
         controller: ctrl,
         keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(
-              color: Colors.white.withOpacity(0.35), fontSize: 12),
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.35), fontSize: 12),
           prefixIcon:
-          Icon(icon, size: 16, color: const Color(0xFF26A69A)),
+          Icon(icon, size: 16, color: theme.primaryColor),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
               vertical: 14, horizontal: 12),
