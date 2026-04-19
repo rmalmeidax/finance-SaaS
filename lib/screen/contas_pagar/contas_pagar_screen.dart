@@ -4,17 +4,37 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/conta_pagar_controller.dart';
-import '../../widgets/theme_toggle_button.dart';
+
+// ══════════════════════════════════════════════════════════════
+// DESIGN TOKENS
+// ══════════════════════════════════════════════════════════════
+abstract class _T {
+  static const teal   = Color(0xFF00BFA5);
+  static const green  = Color(0xFF43A047);
+  static const orange = Color(0xFFEF6C00);
+  static const blue   = Color(0xFF1565C0);
+  static const red    = Color(0xFFC62828);
+  static const mono   = 'monospace';
+
+  static String fmtMoeda(double v) {
+    final n = v.toStringAsFixed(2)
+        .replaceAll('.', ',')
+        .replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?=,))'),
+          (m) => '${m[1]}.',
+    );
+    return 'R\$ $n';
+  }
+
+  static String fmtData(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+}
 
 class ContasPagarScreen extends StatelessWidget {
   const ContasPagarScreen({super.key});
 
   double parseValor(String texto) {
     return double.tryParse(texto.replaceAll(',', '.')) ?? 0;
-  }
-
-  String formatar(double valor) {
-    return valor.toStringAsFixed(2).replaceAll('.', ',');
   }
 
   @override
@@ -38,17 +58,15 @@ class ContasPagarScreen extends StatelessWidget {
             Container(
               width: 3,
               height: 22,
-              decoration: BoxDecoration(
-                color: theme.primaryColor,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
+              decoration: const BoxDecoration(
+                color: _T.teal,
+                borderRadius: BorderRadius.all(Radius.circular(2)),
               ),
             ),
             const SizedBox(width: 10),
             Text(
               "CONTAS A PAGAR",
-              style: TextStyle(
-                color: theme.textTheme.titleLarge?.color,
-                fontFamily: 'serif',
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 3,
@@ -57,7 +75,6 @@ class ContasPagarScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          const ThemeToggleButton(),
           Container(
             margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             decoration: BoxDecoration(
@@ -67,7 +84,7 @@ class ContasPagarScreen extends StatelessWidget {
             child: IconButton(
               padding: EdgeInsets.zero,
               iconSize: 18,
-              icon: Icon(Icons.add, color: isDark ? Colors.black : Colors.white),
+              icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
               onPressed: () => _showDialog(context, controller),
             ),
           ),
@@ -81,14 +98,23 @@ class ContasPagarScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: theme.cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.dividerColor),
+                borderRadius: BorderRadius.circular(14), // Standard 14px
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: TextField(
                 style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: "Buscar fornecedor ou descrição...",
-                  hintStyle: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3), fontSize: 14),
+                  hintStyle: TextStyle(
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
+                    fontSize: 14,
+                  ),
                   prefixIcon: Icon(Icons.search, color: theme.primaryColor, size: 18),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -134,12 +160,12 @@ class ContasPagarScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.receipt_long_outlined,
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.15), size: 56),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.15), size: 56),
                   const SizedBox(height: 12),
                   Text(
                     "Nenhuma conta encontrada",
                     style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
                         fontSize: 14,
                         letterSpacing: 1),
                   ),
@@ -169,10 +195,10 @@ class ContasPagarScreen extends StatelessWidget {
     final paga = conta.status == "Pago" || conta.status == "Recebido";
 
     Color statusColor = paga
-        ? const Color(0xFF4CAF50)
+        ? _T.green
         : vencida
-        ? const Color(0xFFE53935)
-        : theme.primaryColor;
+        ? _T.red
+        : _T.teal;
 
     String statusLabel = paga
         ? "PAGO"
@@ -185,21 +211,28 @@ class ContasPagarScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // Cabeçalho colorido
+          // Cabeçalho colorido (Standardized)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.07),
+              color: statusColor.withValues(alpha: 0.05), // Standard 0.05 opacity
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
               border: Border(
-                bottom: BorderSide(color: statusColor.withOpacity(0.2)),
+                bottom: BorderSide(color: statusColor.withValues(alpha: 0.1)),
               ),
             ),
             child: Row(
@@ -220,9 +253,9 @@ class ContasPagarScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.15),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor.withOpacity(0.4)),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                   ),
                   child: Text(
                     statusLabel,
@@ -254,9 +287,9 @@ class ContasPagarScreen extends StatelessWidget {
                 Row(
                   children: [
                     _infoItem(context, Icons.calendar_today_outlined, "Emissão",
-                        _formatData(conta.dataEmissao)),
+                        _T.fmtData(conta.dataEmissao)),
                     _infoItem(context, Icons.event_outlined, "Vencimento",
-                        _formatData(conta.dataVencimento)),
+                        _T.fmtData(conta.dataVencimento)),
                     _infoItem(context, Icons.percent_outlined, "Juros/Multa",
                         "${conta.juros.toStringAsFixed(1)}% / ${conta.multa.toStringAsFixed(1)}%"),
                   ],
@@ -272,27 +305,29 @@ class ContasPagarScreen extends StatelessWidget {
                         Text(
                           "VALOR ATUALIZADO",
                           style: TextStyle(
-                            color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
+                            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                             fontSize: 9,
                             letterSpacing: 1.5,
                           ),
                         ),
                         Text(
-                          "R\$ ${formatar(conta.valorAtualizado)}",
+                          _T.fmtMoeda(conta.valorAtualizado),
                           style: TextStyle(
                             color: statusColor,
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
+                            fontFamily: _T.mono,
                           ),
                         ),
                         if (conta.valorAtualizado != conta.valorBoleto)
                           Text(
-                            "Original: R\$ ${formatar(conta.valorBoleto)}",
+                            "Original: ${_T.fmtMoeda(conta.valorBoleto)}",
                             style: TextStyle(
-                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
+                              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.3),
                               fontSize: 11,
                               decoration: TextDecoration.lineThrough,
+                              fontFamily: _T.mono,
                             ),
                           ),
                       ],
@@ -304,8 +339,8 @@ class ContasPagarScreen extends StatelessWidget {
                           context,
                           icon: Icons.refresh_rounded,
                           tooltip: "Recalcular",
-                          color: theme.dividerColor.withOpacity(0.05),
-                          iconColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.5) ?? Colors.grey,
+                          color: theme.dividerColor.withValues(alpha: 0.05),
+                          iconColor: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5) ?? Colors.grey,
                           onTap: () async {
                             conta.valorAtualizado =
                                 controller.calcularValorAtualizado(conta);
@@ -318,7 +353,7 @@ class ContasPagarScreen extends StatelessWidget {
                           context,
                           icon: Icons.edit_outlined,
                           tooltip: "Editar",
-                          color: theme.primaryColor.withOpacity(0.1),
+                          color: theme.primaryColor.withValues(alpha: 0.1),
                           iconColor: theme.primaryColor,
                           onTap: () => _showDialog(context, controller, conta: conta),
                         ),
@@ -329,8 +364,8 @@ class ContasPagarScreen extends StatelessWidget {
                             context,
                             icon: Icons.check_rounded,
                             tooltip: "Marcar como Pago",
-                            color: const Color(0xFF4CAF50).withOpacity(0.1),
-                            iconColor: const Color(0xFF4CAF50),
+                            color: _T.green.withValues(alpha: 0.1),
+                            iconColor: _T.green,
                             onTap: () async {
                               await controller.service.marcarComoPago(conta.id);
                             },
@@ -349,6 +384,7 @@ class ContasPagarScreen extends StatelessWidget {
 
   Widget _infoItem(BuildContext context, IconData icon, String label, String value) {
     final theme = Theme.of(context);
+    final isMonospace = label == "Emissão" || label == "Vencimento" || label == "Juros/Multa" || label == "Documento";
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,7 +396,7 @@ class ContasPagarScreen extends StatelessWidget {
               Text(
                 label.toUpperCase(),
                 style: TextStyle(
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.35),
+                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
                   fontSize: 9,
                   letterSpacing: 1,
                 ),
@@ -370,7 +406,10 @@ class ContasPagarScreen extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             value,
-            style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12),
+            style: TextStyle(
+                color: theme.textTheme.bodyMedium?.color,
+                fontSize: 12,
+                fontFamily: isMonospace ? _T.mono : null),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -397,7 +436,7 @@ class ContasPagarScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: iconColor.withOpacity(0.2)),
+            border: Border.all(color: iconColor.withValues(alpha: 0.2)),
           ),
           child: Icon(icon, size: 17, color: iconColor),
         ),
@@ -428,8 +467,8 @@ class ContasPagarScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: selecionado 
-                ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) 
-                : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+                ? theme.colorScheme.onPrimary
+                : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
             fontSize: 11,
             fontWeight: selecionado ? FontWeight.w700 : FontWeight.w400,
             letterSpacing: 0.5,
@@ -439,7 +478,7 @@ class ContasPagarScreen extends StatelessWidget {
     );
   }
 
-  // ── DASHBOARD ──
+  // ── DASHBOARD (Responsive Grid) ──
   Widget _dashboard(BuildContext context, ContaPagarController controller) {
     final theme = Theme.of(context);
     double total = 0, vencido = 0, aPagar = 0;
@@ -456,33 +495,38 @@ class ContasPagarScreen extends StatelessWidget {
     }
 
     return LayoutBuilder(builder: (context, constraints) {
-      final isMobile = constraints.maxWidth < 500;
+      final isMobile = constraints.maxWidth < 600;
+
+      if (isMobile) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              _dashCard(context, "TOTAL", total, _T.teal, Icons.account_balance_wallet_outlined, isFullWidth: true),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _dashCard(context, "VENCIDO", vencido, _T.red, Icons.warning_amber_outlined),
+                  const SizedBox(width: 10),
+                  _dashCard(context, "A PAGAR", aPagar, _T.blue, Icons.schedule_outlined),
+                ],
+              ),
+            ],
+          ),
+        );
+      }
 
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: isMobile
-            ? Column(
-                children: [
-                  _dashCard(context, "TOTAL", total, theme.primaryColor, Icons.account_balance_wallet_outlined, isFullWidth: true),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      _dashCard(context, "VENCIDO", vencido, const Color(0xFFE53935), Icons.warning_amber_outlined),
-                      const SizedBox(width: 10),
-                      _dashCard(context, "A PAGAR", aPagar, const Color(0xFF42A5F5), Icons.schedule_outlined),
-                    ],
-                  ),
-                ],
-              )
-            : Row(
-                children: [
-                  _dashCard(context, "TOTAL", total, theme.primaryColor, Icons.account_balance_wallet_outlined),
-                  const SizedBox(width: 10),
-                  _dashCard(context, "VENCIDO", vencido, const Color(0xFFE53935), Icons.warning_amber_outlined),
-                  const SizedBox(width: 10),
-                  _dashCard(context, "A PAGAR", aPagar, const Color(0xFF42A5F5), Icons.schedule_outlined),
-                ],
-              ),
+        child: Row(
+          children: [
+            _dashCard(context, "TOTAL", total, _T.teal, Icons.account_balance_wallet_outlined),
+            const SizedBox(width: 10),
+            _dashCard(context, "VENCIDO", vencido, _T.red, Icons.warning_amber_outlined),
+            const SizedBox(width: 10),
+            _dashCard(context, "A PAGAR", aPagar, _T.blue, Icons.schedule_outlined),
+          ],
+        ),
       );
     });
   }
@@ -494,10 +538,10 @@ class ContasPagarScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cor.withOpacity(0.25)),
+        border: Border.all(color: cor.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: cor.withOpacity(0.05),
+            color: cor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -523,15 +567,12 @@ class ContasPagarScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "R\$",
-            style: TextStyle(color: theme.textTheme.bodySmall?.color?.withOpacity(0.4), fontSize: 10),
-          ),
-          Text(
-            formatar(valor),
+            _T.fmtMoeda(valor),
             style: TextStyle(
               color: theme.textTheme.bodyLarge?.color,
               fontSize: 18,
               fontWeight: FontWeight.w800,
+              fontFamily: _T.mono,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -541,9 +582,6 @@ class ContasPagarScreen extends StatelessWidget {
 
     return isFullWidth ? card : Expanded(child: card);
   }
-
-  String _formatData(DateTime d) =>
-      "${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}";
 
   // ── DIALOG ──
   void _showDialog(BuildContext context, ContaPagarController controller,
@@ -598,26 +636,25 @@ class ContasPagarScreen extends StatelessWidget {
                       children: [
                         Container(
                           width: 3,
-                          height: 18,
+                          height: 22,
                           decoration: BoxDecoration(
-                            color: theme.primaryColor,
+                            color: _T.teal,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Text(
                           conta == null ? "NOVA CONTA" : "EDITAR CONTA",
-                          style: TextStyle(
-                            color: theme.textTheme.titleMedium?.color,
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            letterSpacing: 2,
+                            letterSpacing: 3,
                             fontSize: 14,
                           ),
                         ),
                         const Spacer(),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
-                          child: Icon(Icons.close, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4), size: 20),
+                          child: Icon(Icons.close, color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
                         ),
                       ],
                     ),
@@ -696,9 +733,9 @@ class ContasPagarScreen extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: theme.primaryColor.withOpacity(0.05),
+                                    color: theme.primaryColor.withValues(alpha: 0.05),
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+                                    border: Border.all(color: theme.primaryColor.withValues(alpha: 0.2)),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -710,7 +747,7 @@ class ContasPagarScreen extends StatelessWidget {
                                           Text(
                                             "TAXA DIÁRIA",
                                             style: TextStyle(
-                                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
+                                              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                                               fontSize: 9,
                                               letterSpacing: 1.5,
                                             ),
@@ -724,12 +761,13 @@ class ContasPagarScreen extends StatelessWidget {
                                           color: theme.primaryColor,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
+                                          fontFamily: _T.mono,
                                         ),
                                       ),
                                       Text(
                                         "ao dia",
                                         style: TextStyle(
-                                          color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
+                                          color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.3),
                                           fontSize: 10,
                                         ),
                                       ),
@@ -761,7 +799,7 @@ class ContasPagarScreen extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               decoration: BoxDecoration(
-                                color: theme.dividerColor.withOpacity(0.1),
+                                color: theme.dividerColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(color: theme.dividerColor),
                               ),
@@ -769,7 +807,7 @@ class ContasPagarScreen extends StatelessWidget {
                                 "CANCELAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 1.5,
@@ -839,7 +877,7 @@ class ContasPagarScreen extends StatelessWidget {
                                 conta == null ? "SALVAR CONTA" : "ATUALIZAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
@@ -865,10 +903,10 @@ class ContasPagarScreen extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 2,
-          height: 12,
+          width: 3,
+          height: 16,
           decoration: BoxDecoration(
-            color: theme.primaryColor,
+            color: _T.teal,
             borderRadius: BorderRadius.circular(1),
           ),
         ),
@@ -879,7 +917,7 @@ class ContasPagarScreen extends StatelessWidget {
             color: theme.primaryColor,
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            letterSpacing: 2,
+            letterSpacing: 1.5,
           ),
         ),
       ],
@@ -895,6 +933,7 @@ class ContasPagarScreen extends StatelessWidget {
         void Function(String)? onChanged,
       }) {
     final theme = Theme.of(context);
+    final isMonospace = label.contains("Valor") || label.contains("Juros") || label.contains("Multa") || label.contains("Nº Documento");
     return Container(
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
@@ -904,12 +943,15 @@ class ContasPagarScreen extends StatelessWidget {
       child: TextField(
         controller: ctrl,
         keyboardType: keyboardType,
-        style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
+        style: TextStyle(
+            color: theme.textTheme.bodyMedium?.color,
+            fontSize: 14,
+            fontFamily: isMonospace ? _T.mono : null),
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(
-            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.35),
+            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
             fontSize: 12,
           ),
           prefixIcon: Icon(icon, size: 16, color: theme.primaryColor),
@@ -969,7 +1011,7 @@ class ContasPagarScreen extends StatelessWidget {
             data: theme.copyWith(
               colorScheme: theme.colorScheme.copyWith(
                 primary: theme.primaryColor,
-                onPrimary: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                onPrimary: theme.colorScheme.onPrimary,
                 surface: theme.cardColor,
               ),
             ),
@@ -996,13 +1038,13 @@ class ContasPagarScreen extends StatelessWidget {
                   Text(
                     label,
                     style: TextStyle(
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.35),
+                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
                       fontSize: 10,
                     ),
                   ),
                   Text(
-                    "${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}",
-                    style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13),
+                    _T.fmtData(data),
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13, fontFamily: _T.mono),
                   ),
                 ],
               ),

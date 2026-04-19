@@ -36,7 +36,7 @@ class RelatorioCardButton extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: config.accent.withOpacity(0.15),
+                    color: config.accent.withValues(alpha: 0.15),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),

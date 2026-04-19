@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/entrada_controller.dart';
 import '../../model/entrada_model.dart';
-import '../../widgets/theme_toggle_button.dart';
 
 class EntradaScreen extends StatelessWidget {
   const EntradaScreen({super.key});
@@ -29,7 +28,7 @@ class EntradaScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new,
-              color: Theme.of(context).primaryColor, size: 18),
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6), size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -37,9 +36,9 @@ class EntradaScreen extends StatelessWidget {
             Container(
               width: 3,
               height: 22,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
+              decoration: const BoxDecoration(
+                color: Color(0xFF00BFA5),
+                borderRadius: BorderRadius.all(Radius.circular(2)),
               ),
             ),
             const SizedBox(width: 10),
@@ -55,7 +54,6 @@ class EntradaScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          const ThemeToggleButton(),
           // Filtro período customizado
           IconButton(
             icon: Icon(Icons.date_range_outlined,
@@ -112,7 +110,7 @@ class EntradaScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: "Buscar por descrição ou cliente...",
                   hintStyle: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.3), fontSize: 14),
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3), fontSize: 14),
                   prefixIcon: Icon(Icons.search,
                       color: Theme.of(context).primaryColor, size: 18),
                   border: InputBorder.none,
@@ -182,12 +180,12 @@ class EntradaScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.trending_up_outlined,
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.12), size: 60),
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.12), size: 60),
                   const SizedBox(height: 12),
                   Text(
                     "Nenhuma entrada encontrada",
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.3),
+                        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
                         fontSize: 14,
                         letterSpacing: 1),
                   ),
@@ -280,12 +278,20 @@ class EntradaScreen extends StatelessWidget {
       flex: wide ? 2 : 1,
       child: Builder(
         builder: (context) {
+          final theme = Theme.of(context);
           return Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cor.withOpacity(0.25)),
+              border: Border.all(color: cor.withValues(alpha: 0.25)),
+              boxShadow: [
+                BoxShadow(
+                  color: cor.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,10 +312,15 @@ class EntradaScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(valor,
+                Text(
+                  "R\$",
+                  style: TextStyle(color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4), fontSize: 10),
+                ),
+                Text(valor.replaceFirst("R\$ ", ""),
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                        fontSize: wide ? 14 : 12,
+                        color: theme.textTheme.bodyMedium?.color,
+                        fontSize: wide ? 18 : 15,
+                        fontFamily: 'monospace',
                         fontWeight: FontWeight.w800),
                     overflow: TextOverflow.ellipsis),
               ],
@@ -339,7 +350,7 @@ class EntradaScreen extends StatelessWidget {
             padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: cor.withOpacity(0.06),
+              color: cor.withValues(alpha: 0.06),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -354,7 +365,7 @@ class EntradaScreen extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: cor.withOpacity(0.12),
+                    color: cor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -379,7 +390,7 @@ class EntradaScreen extends StatelessWidget {
                       if (e.cliente.isNotEmpty)
                         Text(e.cliente,
                             style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
                                 fontSize: 11)),
                     ],
                   ),
@@ -389,9 +400,9 @@ class EntradaScreen extends StatelessWidget {
                   padding:
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: cor.withOpacity(0.12),
+                    color: cor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: cor.withOpacity(0.3)),
+                    border: Border.all(color: cor.withValues(alpha: 0.3)),
                   ),
                   child: Text(e.categoria.label,
                       style: TextStyle(
@@ -419,7 +430,7 @@ class EntradaScreen extends StatelessWidget {
                 ),
                 if (e.observacao.isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  Container(
+                    Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 8),
@@ -431,12 +442,12 @@ class EntradaScreen extends StatelessWidget {
                       children: [
                         Icon(Icons.notes_outlined,
                             size: 13,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.35)),
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35)),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(e.observacao,
                               style: TextStyle(
-                                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5),
+                                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
                                   fontSize: 12)),
                         ),
                       ],
@@ -452,7 +463,7 @@ class EntradaScreen extends StatelessWidget {
                       children: [
                         Text("VALOR",
                             style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
                                 fontSize: 9,
                                 letterSpacing: 1.5)),
                         Text(
@@ -460,6 +471,7 @@ class EntradaScreen extends StatelessWidget {
                           style: const TextStyle(
                               color: Color(0xFF66BB6A),
                               fontSize: 22,
+                              fontFamily: 'monospace',
                               fontWeight: FontWeight.w800),
                         ),
                       ],
@@ -469,7 +481,7 @@ class EntradaScreen extends StatelessWidget {
                         _actionButton(
                           icon: Icons.edit_outlined,
                           tooltip: "Editar",
-                          color: const Color(0xFF4FC3F7).withOpacity(0.1),
+                          color: const Color(0xFF4FC3F7).withValues(alpha: 0.1),
                           iconColor: const Color(0xFF4FC3F7),
                           onTap: () =>
                               _showDialog(context, controller, entrada: e),
@@ -478,8 +490,8 @@ class EntradaScreen extends StatelessWidget {
                         _actionButton(
                           icon: Icons.delete_outline,
                           tooltip: "Excluir",
-                          color: Colors.red.withOpacity(0.1),
-                          iconColor: Colors.red.withOpacity(0.6),
+                          color: Colors.red.withValues(alpha: 0.1),
+                          iconColor: Colors.red.withValues(alpha: 0.6),
                           onTap: () =>
                               _confirmDelete(context, e, controller),
                         ),
@@ -525,14 +537,18 @@ class EntradaScreen extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(label,
                       style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.35),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
                           fontSize: 9,
                           letterSpacing: 1)),
                 ],
               ),
               const SizedBox(height: 3),
               Text(value,
-                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 12),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color, 
+                    fontSize: 12,
+                    fontFamily: (label == "Data") ? 'monospace' : null,
+                  ),
                   overflow: TextOverflow.ellipsis),
             ],
           );
@@ -559,7 +575,7 @@ class EntradaScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: iconColor.withOpacity(0.2)),
+            border: Border.all(color: iconColor.withValues(alpha: 0.2)),
           ),
           child: Icon(icon, size: 17, color: iconColor),
         ),
@@ -591,7 +607,7 @@ class EntradaScreen extends StatelessWidget {
             ),
             child: Text(label,
                 style: TextStyle(
-                    color: selected ? (Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                    color: selected ? (Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                     fontSize: 11,
                     fontWeight:
                     selected ? FontWeight.w700 : FontWeight.w400)),
@@ -611,9 +627,9 @@ class EntradaScreen extends StatelessWidget {
         padding:
         const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFB74D).withOpacity(0.15),
+          color: const Color(0xFFFFB74D).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFFFB74D).withOpacity(0.4)),
+          border: Border.all(color: const Color(0xFFFFB74D).withValues(alpha: 0.4)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -625,6 +641,7 @@ class EntradaScreen extends StatelessWidget {
                 style: const TextStyle(
                     color: Color(0xFFFFB74D),
                     fontSize: 11,
+                    fontFamily: 'monospace',
                     fontWeight: FontWeight.w600)),
             const SizedBox(width: 6),
             const Icon(Icons.close, size: 12, color: Color(0xFFFFB74D)),
@@ -660,7 +677,7 @@ class EntradaScreen extends StatelessWidget {
                 ],
                 Text(label,
                     style: TextStyle(
-                        color: selected ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                        color: selected ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                         fontSize: 11,
                         fontWeight:
                         selected ? FontWeight.w700 : FontWeight.w400)),
@@ -699,7 +716,7 @@ class EntradaScreen extends StatelessWidget {
               Text("Tem certeza que deseja excluir \"${e.descricao}\"?",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5),
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
                       fontSize: 13)),
               const SizedBox(height: 20),
               Row(
@@ -719,7 +736,7 @@ class EntradaScreen extends StatelessWidget {
                         child: Text("CANCELAR",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1)),
@@ -818,14 +835,14 @@ class EntradaScreen extends StatelessWidget {
                         style: TextStyle(
                             color: Theme.of(context).textTheme.bodyMedium?.color,
                             fontWeight: FontWeight.w700,
-                            letterSpacing: 2,
+                            letterSpacing: 3,
                             fontSize: 14),
                       ),
                       const Spacer(),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Icon(Icons.close,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4), size: 20),
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
                       ),
                     ],
                   ),
@@ -890,7 +907,7 @@ class EntradaScreen extends StatelessWidget {
                                         style: TextStyle(
                                             color: selected
                                                 ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                                                : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                                : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                             fontSize: 12,
                                             fontWeight: selected
                                                 ? FontWeight.w700
@@ -955,12 +972,13 @@ class EntradaScreen extends StatelessWidget {
                                             Text("Data",
                                                 style: TextStyle(
                                                     color: Theme.of(context).textTheme.bodyMedium?.color
-                                                        ?.withOpacity(0.35),
+                                                        ?.withValues(alpha: 0.35),
                                                     fontSize: 10)),
                                             Text(_formatData(data),
                                                 style: TextStyle(
                                                     color: Theme.of(context).textTheme.bodyMedium?.color,
-                                                    fontSize: 13)),
+                                                    fontSize: 13,
+                                                    fontFamily: 'monospace')),
                                           ],
                                         ),
                                       ),
@@ -979,7 +997,7 @@ class EntradaScreen extends StatelessWidget {
                                   Text("Status",
                                       style: TextStyle(
                                           color: Theme.of(context).textTheme.bodyMedium?.color
-                                              ?.withOpacity(0.35),
+                                              ?.withValues(alpha: 0.35),
                                           fontSize: 10)),
                                   const SizedBox(height: 6),
                                   Row(
@@ -1017,7 +1035,7 @@ class EntradaScreen extends StatelessWidget {
                                                 style: TextStyle(
                                                     color: sel
                                                         ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                                                        : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                                        : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                                     fontSize: 11,
                                                     fontWeight: sel
                                                         ? FontWeight.w700
@@ -1065,7 +1083,7 @@ class EntradaScreen extends StatelessWidget {
                             child: Text("CANCELAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 1.5)),
@@ -1135,10 +1153,10 @@ class EntradaScreen extends StatelessWidget {
         return Row(
           children: [
             Container(
-              width: 2,
-              height: 12,
+              width: 3,
+              height: 16,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: const Color(0xFF00BFA5),
                 borderRadius: BorderRadius.circular(1),
               ),
             ),
@@ -1148,7 +1166,7 @@ class EntradaScreen extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 2)),
+                    letterSpacing: 1.5)),
           ],
         );
       }
@@ -1163,6 +1181,7 @@ class EntradaScreen extends StatelessWidget {
       }) {
     return Builder(
       builder: (context) {
+        final isMonospace = label.contains("Valor") || label.contains("Nº Documento");
         return Container(
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
@@ -1172,11 +1191,15 @@ class EntradaScreen extends StatelessWidget {
           child: TextField(
             controller: ctrl,
             keyboardType: keyboardType,
-            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 14),
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color, 
+              fontSize: 14,
+              fontFamily: isMonospace ? 'monospace' : null,
+            ),
             decoration: InputDecoration(
               labelText: label,
               labelStyle: TextStyle(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.35), fontSize: 12),
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35), fontSize: 12),
               prefixIcon:
               Icon(icon, size: 16, color: Theme.of(context).primaryColor),
               border: InputBorder.none,

@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/investimento_controller.dart';
 import '../../model/investimento_model.dart';
-import '../../widgets/theme_toggle_button.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DESIGN TOKENS
@@ -18,7 +17,7 @@ class _C {
   static const blue   = Color(0xFF2196F3);
   static const yellow = Color(0xFFFFA726);
   static const purple = Color(0xFF8B6FD4);
-  static const teal   = Color(0xFF00BFA5); // barra vertical do header
+  static const teal   = Color(0xFF00BFA5);
   static const mono   = 'monospace';
 }
 
@@ -77,7 +76,7 @@ class _InvestimentosScreenState extends State<InvestimentosScreen>
 }
 
 // ─────────────────────────────────────────────────────────────
-//  HEADER — modelo: < | TÍTULO
+//  HEADER
 // ─────────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
   final InvestmentController ctrl;
@@ -85,11 +84,11 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor       = Theme.of(context).textTheme.bodyMedium?.color;
-    final secondaryText   = textColor?.withOpacity(0.6);
-    final borderColor     = Theme.of(context).dividerColor;
-    final cardColor       = Theme.of(context).cardColor;
-    final secondaryBg     = Theme.of(context).scaffoldBackgroundColor;
+    final textColor     = Theme.of(context).textTheme.bodyMedium?.color;
+    final secondaryText = textColor?.withValues(alpha: 0.6);
+    final borderColor   = Theme.of(context).dividerColor;
+    final cardColor     = Theme.of(context).cardColor;
+    final secondaryBg   = Theme.of(context).scaffoldBackgroundColor;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
@@ -99,38 +98,36 @@ class _Header extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // ── Botão voltar + barra teal + título ──────────────
+          // Botão voltar
           GestureDetector(
             onTap: () => Navigator.pop(context),
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Icon(
-                Icons.chevron_left,
-                size: 22,
-                color: secondaryText,
-              ),
+              child: Icon(Icons.chevron_left, size: 22, color: secondaryText),
             ),
           ),
           // Barra vertical teal
           Container(
-            width: 2,
-            height: 18,
+            width: 3,
+            height: 22,
             decoration: BoxDecoration(
               color: _C.teal,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(width: 10),
-          // Título uppercase
-          Text(
-            'INVESTIMENTOS',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: textColor,
-              letterSpacing: 1.2,
-              fontFamily: _C.mono,
+          // Título — FLEXIBLE para não estourar
+          Flexible(
+            child: Text(
+              'INVESTIMENTOS',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+                letterSpacing: 3,
+              ),
             ),
           ),
           const Spacer(),
@@ -154,8 +151,6 @@ class _Header extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          const ThemeToggleButton(),
         ],
       ),
     );
@@ -188,9 +183,9 @@ class _PulseBadgeState extends State<_PulseBadge>
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: _C.red.withOpacity(.13),
+        color: _C.red.withValues(alpha: .13),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _C.red.withOpacity(.3)),
+        border: Border.all(color: _C.red.withValues(alpha: .3)),
       ),
       child: const Text(
         '● AO VIVO',
@@ -216,11 +211,11 @@ class _TickerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor     = Theme.of(context).dividerColor;
-    final cardColor       = Theme.of(context).cardColor;
-    final textColor       = Theme.of(context).textTheme.bodyMedium?.color;
-    final secondaryText   = textColor?.withOpacity(0.6);
-    final primary         = Theme.of(context).primaryColor;
+    final borderColor   = Theme.of(context).dividerColor;
+    final cardColor     = Theme.of(context).cardColor;
+    final textColor     = Theme.of(context).textTheme.bodyMedium?.color;
+    final secondaryText = textColor?.withValues(alpha: 0.6);
+    final primary       = Theme.of(context).primaryColor;
 
     final items = ctrl.ticker;
     if (items.isEmpty) return const SizedBox.shrink();
@@ -298,30 +293,47 @@ class _TickItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 140,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         border: Border(right: BorderSide(color: borderColor)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(item.symbol,
+          // Symbol — tamanho fixo, nunca cresce
+          Text(
+            item.symbol,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: secondaryTextColor,
+              fontSize: 11,
+              fontFamily: _C.mono,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          // Valor — Flexible para não estourar
+          Flexible(
+            child: Text(
+              _fmtVal(item.value),
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  color: secondaryTextColor,
-                  fontSize: 11,
-                  fontFamily: _C.mono,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(width: 6),
-          Text(_fmtVal(item.value),
-              style:
-              TextStyle(color: textColor, fontSize: 11, fontFamily: _C.mono)),
-          const SizedBox(width: 5),
+                color: textColor,
+                fontSize: 11,
+                fontFamily: _C.mono,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          // Percentual — tamanho fixo pequeno
           Text(
             '${item.isPositive ? '+' : ''}${item.changePercent.toStringAsFixed(2)}%',
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-                color: item.isPositive ? primary : _C.red,
-                fontSize: 10,
-                fontFamily: _C.mono),
+              color: item.isPositive ? primary : _C.red,
+              fontSize: 10,
+              fontFamily: _C.mono,
+            ),
           ),
         ],
       ),
@@ -381,6 +393,13 @@ class _MetricsRow extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -402,23 +421,25 @@ class _MetricsRow extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                        child: _MetricTile(
-                          label: 'RENDIMENTO',
-                          value: ctrl.fmtCurrency(ctrl.totalReturn),
-                          sub: ctrl.totalReturn >= 0 ? '▲ lucro' : '▼ perda',
-                          valueColor: _C.blue,
-                          subColor: ctrl.totalReturn >= 0 ? primary : _C.red,
-                          showBorder: true,
-                        )),
+                      child: _MetricTile(
+                        label: 'RENDIMENTO',
+                        value: ctrl.fmtCurrency(ctrl.totalReturn),
+                        sub: ctrl.totalReturn >= 0 ? '▲ lucro' : '▼ perda',
+                        valueColor: _C.blue,
+                        subColor: ctrl.totalReturn >= 0 ? primary : _C.red,
+                        showBorder: true,
+                      ),
+                    ),
                     Expanded(
-                        child: _MetricTile(
-                          label: 'HOJE',
-                          value: ctrl.fmtCurrency(daily),
-                          sub: daily >= 0 ? '▲ hoje' : '▼ hoje',
-                          valueColor: daily >= 0 ? _C.green2 : _C.red,
-                          subColor: daily >= 0 ? primary : _C.red,
-                          showBorder: false,
-                        )),
+                      child: _MetricTile(
+                        label: 'HOJE',
+                        value: ctrl.fmtCurrency(daily),
+                        sub: daily >= 0 ? '▲ hoje' : '▼ hoje',
+                        valueColor: daily >= 0 ? _C.green2 : _C.red,
+                        subColor: daily >= 0 ? primary : _C.red,
+                        showBorder: false,
+                      ),
+                    ),
                   ],
                 ),
                 Divider(height: 1, color: borderColor),
@@ -427,7 +448,7 @@ class _MetricsRow extends StatelessWidget {
                   value: '${ctrl.investments.length}',
                   sub: 'na carteira',
                   valueColor: textColor ?? Colors.white,
-                  subColor: textColor?.withOpacity(0.6) ?? Colors.white70,
+                  subColor: textColor?.withValues(alpha: 0.6) ?? Colors.white70,
                   showBorder: false,
                   isFullWidth: true,
                 ),
@@ -466,7 +487,7 @@ class _MetricsRow extends StatelessWidget {
                 value: '${ctrl.investments.length}',
                 sub: 'na carteira',
                 valueColor: textColor ?? Colors.white,
-                subColor: textColor?.withOpacity(0.6) ?? Colors.white70,
+                subColor: textColor?.withValues(alpha: 0.6) ?? Colors.white70,
                 showBorder: false,
               ),
             ].map((t) => Expanded(child: t)).toList(),
@@ -509,7 +530,7 @@ class _MetricTile extends StatelessWidget {
         children: [
           Text(label,
               style: TextStyle(
-                  color: textColor?.withOpacity(0.4),
+                  color: textColor?.withValues(alpha: 0.4),
                   fontSize: 8,
                   fontFamily: _C.mono,
                   letterSpacing: 1.6,
@@ -522,6 +543,7 @@ class _MetricTile extends StatelessWidget {
             child: Text(value,
                 style: TextStyle(
                     color: valueColor,
+                    fontFamily: _C.mono,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -.6)),
@@ -590,11 +612,21 @@ class _ChartCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
             child: Row(
               children: [
-                Text('Performance da Carteira',
+                Container(
+                  width: 3,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: _C.teal,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('PERFORMANCE',
                     style: TextStyle(
                         color: textColor,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5)),
                 const Spacer(),
                 for (final r in ['1D', '1S', '1M', '3M', '1A'])
                   _RangeTab(
@@ -615,9 +647,9 @@ class _ChartCard extends StatelessWidget {
                   data: ctrl.chartData,
                   labels: ctrl.chartLabels,
                   primaryColor: primary,
-                  gridColor: textColor?.withOpacity(0.05) ??
-                      Colors.white.withOpacity(0.05),
-                  labelColor: textColor?.withOpacity(0.4) ??
+                  gridColor: textColor?.withValues(alpha: 0.05) ??
+                      Colors.white.withValues(alpha: 0.05),
+                  labelColor: textColor?.withValues(alpha: 0.4) ??
                       const Color(0x997B8699),
                   chartRange: ctrl.chartRange,
                 ),
@@ -650,12 +682,12 @@ class _RangeTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         margin: const EdgeInsets.only(left: 2),
         decoration: BoxDecoration(
-          color: active ? primary.withOpacity(0.1) : Colors.transparent,
+          color: active ? primary.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(5),
         ),
         child: Text(label,
             style: TextStyle(
-                color: active ? primary : textColor?.withOpacity(0.4),
+                color: active ? primary : textColor?.withValues(alpha: 0.4),
                 fontSize: 10,
                 fontFamily: _C.mono,
                 fontWeight: FontWeight.w600)),
@@ -689,11 +721,11 @@ class _ChartPainter extends CustomPainter {
     final cW = size.width - pl - pr;
     final cH = size.height - pt - pb;
 
-    final mn = data.reduce(math.min) * .997;
-    final mx = data.reduce(math.max) * 1.003;
+    final mn  = data.reduce(math.min) * .997;
+    final mx  = data.reduce(math.max) * 1.003;
     final rng = mx - mn;
 
-    double tx(int i) => pl + i / (data.length - 1) * cW;
+    double tx(int i)    => pl + i / (data.length - 1) * cW;
     double ty(double v) => pt + (1 - (v - mn) / rng) * cH;
 
     final gridPaint = Paint()
@@ -706,7 +738,8 @@ class _ChartPainter extends CustomPainter {
       final tp = TextPainter(
         text: TextSpan(
           text: 'R\$${(val / 1000).toStringAsFixed(0)}k',
-          style: TextStyle(color: labelColor, fontSize: 8, fontFamily: 'monospace'),
+          style: TextStyle(
+              color: labelColor, fontSize: 8, fontFamily: 'monospace'),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -727,7 +760,10 @@ class _ChartPainter extends CustomPainter {
     final gradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [primaryColor.withOpacity(.22), primaryColor.withOpacity(0)],
+      colors: [
+        primaryColor.withValues(alpha: .22),
+        primaryColor.withValues(alpha: 0),
+      ],
     );
     canvas.drawPath(
       fillPath,
@@ -751,7 +787,8 @@ class _ChartPainter extends CustomPainter {
       final tp = TextPainter(
         text: TextSpan(
           text: labels[i],
-          style: TextStyle(color: labelColor, fontSize: 8, fontFamily: 'monospace'),
+          style: TextStyle(
+              color: labelColor, fontSize: 8, fontFamily: 'monospace'),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -765,7 +802,7 @@ class _ChartPainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  SIDE PANEL — overflow do sparkline IBOVESPA corrigido
+//  SIDE PANEL
 // ─────────────────────────────────────────────────────────────
 class _SidePanel extends StatelessWidget {
   final InvestmentController ctrl;
@@ -794,7 +831,7 @@ class _SidePanel extends StatelessWidget {
                     children: [
                       Text('IBOVESPA',
                           style: TextStyle(
-                              color: textColor?.withOpacity(0.4),
+                              color: textColor?.withValues(alpha: 0.4),
                               fontSize: 9,
                               fontFamily: _C.mono,
                               letterSpacing: 1.6)),
@@ -807,6 +844,7 @@ class _SidePanel extends StatelessWidget {
                                 (m) => '${m[1]}.'),
                         style: TextStyle(
                             color: primary,
+                            fontFamily: _C.mono,
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -1.2),
@@ -826,7 +864,7 @@ class _SidePanel extends StatelessWidget {
                     Text(
                       '${ibov.isPositive ? '+' : ''}${(ibov.value * ibov.changePercent / 100).toStringAsFixed(0)} pts',
                       style: TextStyle(
-                          color: textColor?.withOpacity(0.4),
+                          color: textColor?.withValues(alpha: 0.4),
                           fontSize: 9,
                           fontFamily: _C.mono),
                     ),
@@ -836,13 +874,13 @@ class _SidePanel extends StatelessWidget {
             ),
           ),
 
-          // ── Sparkline IBOVESPA — ClipRect impede overflow ──
+          // Sparkline IBOVESPA
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
             child: SizedBox(
               height: 52,
               width: double.infinity,
-              child: ClipRect(                          // ← correção do overflow
+              child: ClipRect(
                 child: CustomPaint(
                   painter: _SparkPainter(
                     data: ibov.sparkData,
@@ -887,9 +925,6 @@ class _IndexRow extends StatelessWidget {
     final primary   = Theme.of(context).primaryColor;
     final textColor = Theme.of(context).textTheme.bodyMedium?.color;
 
-    // Layout fixo sem Spacer:
-    // [label 52] [spark Expanded] [valor 52] [pill 58]
-    // Total com padding interno (28px) ≤ 280px do SidePanel
     return Row(
       children: [
         SizedBox(
@@ -899,13 +934,12 @@ class _IndexRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             style: TextStyle(
-                color: textColor?.withOpacity(0.6),
+                color: textColor?.withValues(alpha: 0.6),
                 fontSize: 11,
                 fontFamily: _C.mono),
           ),
         ),
         const SizedBox(width: 4),
-        // Sparkline ocupa o espaço restante
         Expanded(
           child: SizedBox(
             height: 28,
@@ -935,7 +969,6 @@ class _IndexRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        // Pill com largura fixa para não estourar
         SizedBox(
           width: 56,
           child: _Pill(
@@ -983,11 +1016,10 @@ class _SparkPainter extends CustomPainter {
         ..lineTo(0, size.height)
         ..close();
 
-      // Gradiente restrito ao bounds do widget — não vaza mais
       final gradient = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [color.withOpacity(.25), color.withOpacity(0)],
+        colors: [color.withValues(alpha: .25), color.withValues(alpha: 0)],
       );
       canvas.drawPath(
         fill,
@@ -1011,7 +1043,7 @@ class _SparkPainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  FORM CARD
+//  FORM CARD — CORRIGIDO para mobile
 // ─────────────────────────────────────────────────────────────
 class _FormCard extends StatefulWidget {
   final InvestmentController ctrl;
@@ -1051,6 +1083,48 @@ class _FormCardState extends State<_FormCard> {
     super.dispose();
   }
 
+  // Constrói o campo de data — reutilizado nos dois layouts
+  Widget _buildDateField(
+      BuildContext context, Color bgColor, Color borderColor, Color? textColor) {
+    return _Field(
+      label: 'DATA DE ENTRADA',
+      child: GestureDetector(
+        onTap: () async {
+          final d = await showDatePicker(
+            context: context,
+            initialDate: _date,
+            firstDate: DateTime(2000),
+            lastDate: DateTime.now(),
+          );
+          if (d != null) setState(() => _date = d);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(7),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${_date.day.toString().padLeft(2, '0')}/'
+                      '${_date.month.toString().padLeft(2, '0')}/'
+                      '${_date.year}',
+                  style: TextStyle(
+                      color: textColor, fontSize: 12, fontFamily: _C.mono),
+                ),
+              ),
+              Icon(Icons.calendar_today_outlined,
+                  color: textColor?.withValues(alpha: 0.4), size: 14),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary     = Theme.of(context).primaryColor;
@@ -1064,6 +1138,7 @@ class _FormCardState extends State<_FormCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Título
             Row(children: [
               Text('+ ', style: TextStyle(color: primary, fontSize: 15)),
               Text('Novo Lançamento',
@@ -1074,136 +1149,141 @@ class _FormCardState extends State<_FormCard> {
             ]),
             const SizedBox(height: 14),
 
+            // ── Linha 1: Nome / Tipo / Valor Investido ──────────
             LayoutBuilder(builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 600;
-              final fields = [
-                Expanded(
-                  flex: isNarrow ? 0 : 3,
-                  child: _Field(
-                      label: 'NOME / ATIVO',
-                      child: _Input(
-                          ctrl: _name, hint: 'Ex: PETR4, Bitcoin...')),
-                ),
-                if (!isNarrow) const SizedBox(width: 10),
-                Expanded(
-                  flex: isNarrow ? 0 : 2,
-                  child: _Field(
-                    label: 'TIPO',
-                    child: _DropField(
-                      value: _type,
-                      options: _typeOptions,
-                      onChanged: (t) => setState(() => _type = t),
-                    ),
-                  ),
-                ),
-                if (!isNarrow) const SizedBox(width: 10),
-                Expanded(
-                  flex: isNarrow ? 0 : 2,
-                  child: _Field(
-                      label: 'VALOR INVESTIDO (R\$)',
-                      child: _Input(
-                          ctrl: _invest, hint: '0,00', isNum: true)),
-                ),
-              ];
 
               if (isNarrow) {
-                return Column(children: [
-                  fields[0],
-                  const SizedBox(height: 10),
-                  fields[2],
-                  const SizedBox(height: 10),
-                  fields[4],
-                ]);
+                // MOBILE: Column simples, SEM Expanded
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _Field(
+                      label: 'NOME / ATIVO',
+                      child: _Input(
+                          ctrl: _name, hint: 'Ex: PETR4, Bitcoin...'),
+                    ),
+                    const SizedBox(height: 10),
+                    _Field(
+                      label: 'TIPO',
+                      child: _DropField(
+                        value: _type,
+                        options: _typeOptions,
+                        onChanged: (t) => setState(() => _type = t),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _Field(
+                      label: 'VALOR INVESTIDO (R\$)',
+                      child: _Input(
+                          ctrl: _invest, hint: '0,00', isNum: true),
+                    ),
+                  ],
+                );
               }
-              return Row(children: fields);
+
+              // WIDE: Row com Expanded
+              return Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: _Field(
+                        label: 'NOME / ATIVO',
+                        child: _Input(
+                            ctrl: _name, hint: 'Ex: PETR4, Bitcoin...')),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: _Field(
+                      label: 'TIPO',
+                      child: _DropField(
+                        value: _type,
+                        options: _typeOptions,
+                        onChanged: (t) => setState(() => _type = t),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: _Field(
+                        label: 'VALOR INVESTIDO (R\$)',
+                        child: _Input(
+                            ctrl: _invest, hint: '0,00', isNum: true)),
+                  ),
+                ],
+              );
             }),
 
             const SizedBox(height: 10),
 
+            // ── Linha 2: Valor Atual / Qtd / Data ───────────────
             LayoutBuilder(builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 600;
-              final fields = [
-                Expanded(
-                  flex: isNarrow ? 0 : 1,
-                  child: _Field(
-                      label: 'VALOR ATUAL (R\$)',
-                      child: _Input(
-                          ctrl: _atual, hint: '0,00', isNum: true)),
-                ),
-                if (!isNarrow) const SizedBox(width: 10),
-                Expanded(
-                  flex: isNarrow ? 0 : 1,
-                  child: _Field(
-                      label: 'QTD. COTAS / AÇÕES',
-                      child:
-                      _Input(ctrl: _qty, hint: '0', isNum: true)),
-                ),
-                if (!isNarrow) const SizedBox(width: 10),
-                Expanded(
-                  flex: isNarrow ? 0 : 1,
-                  child: _Field(
-                    label: 'DATA DE ENTRADA',
-                    child: GestureDetector(
-                      onTap: () async {
-                        final d = await showDatePicker(
-                          context: context,
-                          initialDate: _date,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
-                        );
-                        if (d != null) setState(() => _date = d);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 11, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: bgColor,
-                          borderRadius: BorderRadius.circular(7),
-                          border: Border.all(color: borderColor),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '${_date.day.toString().padLeft(2, '0')}/${_date.month.toString().padLeft(2, '0')}/${_date.year}',
-                                style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 12,
-                                    fontFamily: _C.mono),
-                              ),
-                            ),
-                            Icon(Icons.calendar_today_outlined,
-                                color: textColor?.withOpacity(0.4),
-                                size: 14),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ];
 
               if (isNarrow) {
-                return Column(children: [
-                  fields[0],
-                  const SizedBox(height: 10),
-                  fields[2],
-                  const SizedBox(height: 10),
-                  fields[4],
-                ]);
+                // MOBILE: Column simples, SEM Expanded
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _Field(
+                      label: 'VALOR ATUAL (R\$)',
+                      child: _Input(
+                          ctrl: _atual, hint: '0,00', isNum: true),
+                    ),
+                    const SizedBox(height: 10),
+                    _Field(
+                      label: 'QTD. COTAS / AÇÕES',
+                      child:
+                      _Input(ctrl: _qty, hint: '0', isNum: true),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildDateField(
+                        context, bgColor, borderColor, textColor),
+                  ],
+                );
               }
-              return Row(children: fields);
+
+              // WIDE: Row com Expanded
+              return Row(
+                children: [
+                  Expanded(
+                    child: _Field(
+                        label: 'VALOR ATUAL (R\$)',
+                        child: _Input(
+                            ctrl: _atual, hint: '0,00', isNum: true)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _Field(
+                        label: 'QTD. COTAS / AÇÕES',
+                        child:
+                        _Input(ctrl: _qty, hint: '0', isNum: true)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildDateField(
+                        context, bgColor, borderColor, textColor),
+                  ),
+                ],
+              );
             }),
 
             const SizedBox(height: 14),
+
+            // ── Botão submit ────────────────────────────────────
             Row(
               children: [
                 if (_msg != null)
-                  Text(_msg!,
-                      style: TextStyle(
-                          color: primary,
-                          fontSize: 11,
-                          fontFamily: _C.mono)),
+                  Flexible(
+                    child: Text(_msg!,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: primary,
+                            fontSize: 11,
+                            fontFamily: _C.mono)),
+                  ),
                 const Spacer(),
                 GestureDetector(
                   onTap: _submit,
@@ -1212,7 +1292,10 @@ class _FormCardState extends State<_FormCard> {
                         horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                          colors: [primary, primary.withOpacity(0.8)]),
+                          colors: [
+                            primary,
+                            primary.withValues(alpha: 0.8),
+                          ]),
                       borderRadius: BorderRadius.circular(7),
                     ),
                     child: Text(
@@ -1281,7 +1364,7 @@ class _Field extends StatelessWidget {
       children: [
         Text(label,
             style: TextStyle(
-                color: textColor?.withOpacity(0.4),
+                color: textColor?.withValues(alpha: 0.4),
                 fontSize: 8,
                 fontFamily: _C.mono,
                 letterSpacing: 1.6,
@@ -1309,14 +1392,13 @@ class _Input extends StatelessWidget {
 
     return TextField(
       controller: ctrl,
-      keyboardType:
-      isNum ? TextInputType.number : TextInputType.text,
+      keyboardType: isNum ? TextInputType.number : TextInputType.text,
       style: TextStyle(
           color: textColor, fontSize: 12, fontFamily: _C.mono),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-            color: textColor?.withOpacity(0.4), fontSize: 12),
+            color: textColor?.withValues(alpha: 0.4), fontSize: 12),
         filled: true,
         fillColor: bgColor,
         contentPadding:
@@ -1373,7 +1455,7 @@ class _DropField extends StatelessWidget {
             borderSide: BorderSide(color: primary, width: 1.2)),
       ),
       icon: Icon(Icons.keyboard_arrow_down,
-          color: textColor?.withOpacity(0.4), size: 16),
+          color: textColor?.withValues(alpha: 0.4), size: 16),
       items: options
           .map((o) => DropdownMenuItem(
         value: o.$2,
@@ -1419,7 +1501,7 @@ class _TableCard extends StatelessWidget {
                 const Spacer(),
                 Text('${invs.length} ativos',
                     style: TextStyle(
-                        color: textColor?.withOpacity(0.4),
+                        color: textColor?.withValues(alpha: 0.4),
                         fontSize: 10,
                         fontFamily: _C.mono)),
               ],
@@ -1458,7 +1540,7 @@ class _TableCard extends StatelessWidget {
                         child: Center(
                           child: Text('Nenhum ativo na carteira.',
                               style: TextStyle(
-                                  color: textColor?.withOpacity(0.4),
+                                  color: textColor?.withValues(alpha: 0.4),
                                   fontFamily: _C.mono,
                                   fontSize: 11)),
                         ),
@@ -1467,15 +1549,14 @@ class _TableCard extends StatelessWidget {
                       ...invs.map((inv) => _TableRow(
                         inv: inv,
                         total: total,
-                        onDelete: () =>
-                            ctrl.removeInvestment(inv.id),
+                        onDelete: () => ctrl.removeInvestment(inv.id),
                         fmtC: ctrl.fmtCurrency,
                       )),
                   ],
                 ),
               ),
             );
-          }),   // fim LayoutBuilder
+          }),
         ],
       ),
     );
@@ -1491,7 +1572,7 @@ class _TH extends StatelessWidget {
     final textColor = Theme.of(context).textTheme.bodyMedium?.color;
     return Text(text,
         style: TextStyle(
-            color: textColor?.withOpacity(0.4),
+            color: textColor?.withValues(alpha: 0.4),
             fontSize: 8,
             fontFamily: _C.mono,
             letterSpacing: 1.6,
@@ -1513,32 +1594,31 @@ class _TableRow extends StatelessWidget {
   });
 
   static const _chipColors = {
-    InvestmentType.acoes:     (_C.blue,              'Ações'),
-    InvestmentType.fii:       (_C.yellow,             'FII'),
-    InvestmentType.cripto:    (Color(0xFFFF6B8A),     'Cripto'),
-    InvestmentType.rendaFixa: (_C.green,              'Renda Fixa'),
-    InvestmentType.etf:       (_C.purple,             'ETF'),
+    InvestmentType.acoes:     (_C.blue,           'Ações'),
+    InvestmentType.fii:       (_C.yellow,          'FII'),
+    InvestmentType.cripto:    (Color(0xFFFF6B8A),  'Cripto'),
+    InvestmentType.rendaFixa: (_C.green,           'Renda Fixa'),
+    InvestmentType.etf:       (_C.purple,          'ETF'),
   };
 
   @override
   Widget build(BuildContext context) {
-    final ret       = inv.totalReturn;
-    final pct       = inv.returnPercent;
-    final peso      = total > 0 ? inv.currentValue / total * 100 : 0.0;
-    final isUp      = ret >= 0;
-    final primary   = Theme.of(context).primaryColor;
-    final retColor  = isUp ? primary : _C.red;
-    final chip      = _chipColors[inv.type]!;
-    final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+    final ret         = inv.totalReturn;
+    final pct         = inv.returnPercent;
+    final peso        = total > 0 ? inv.currentValue / total * 100 : 0.0;
+    final isUp        = ret >= 0;
+    final primary     = Theme.of(context).primaryColor;
+    final retColor    = isUp ? primary : _C.red;
+    final chip        = _chipColors[inv.type]!;
+    final textColor   = Theme.of(context).textTheme.bodyMedium?.color;
     final borderColor = Theme.of(context).dividerColor;
 
     return Container(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
           border: Border(
               bottom: BorderSide(
-                  color: borderColor.withOpacity(0.1)))),
+                  color: borderColor.withValues(alpha: 0.1)))),
       child: Row(
         children: [
           Expanded(
@@ -1558,7 +1638,7 @@ class _TableRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: TextStyle(
-                        color: textColor?.withOpacity(0.4),
+                        color: textColor?.withValues(alpha: 0.4),
                         fontSize: 10,
                         fontFamily: _C.mono),
                   ),
@@ -1572,10 +1652,10 @@ class _TableRow extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 7, vertical: 3),
                   decoration: BoxDecoration(
-                    color: chip.$1.withOpacity(.12),
+                    color: chip.$1.withValues(alpha: .12),
                     borderRadius: BorderRadius.circular(4),
                     border:
-                    Border.all(color: chip.$1.withOpacity(.3)),
+                    Border.all(color: chip.$1.withValues(alpha: .3)),
                   ),
                   child: Text(chip.$2,
                       overflow: TextOverflow.ellipsis,
@@ -1638,9 +1718,8 @@ class _TableRow extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: peso / 100,
                         backgroundColor:
-                        borderColor.withOpacity(0.2),
-                        valueColor:
-                        AlwaysStoppedAnimation(retColor),
+                        borderColor.withValues(alpha: 0.2),
+                        valueColor: AlwaysStoppedAnimation(retColor),
                         minHeight: 4,
                       ),
                     )),
@@ -1648,7 +1727,7 @@ class _TableRow extends StatelessWidget {
                 GestureDetector(
                   onTap: onDelete,
                   child: Icon(Icons.close,
-                      color: textColor?.withOpacity(0.4),
+                      color: textColor?.withValues(alpha: 0.4),
                       size: 14),
                 ),
               ])),
@@ -1679,6 +1758,13 @@ class _FooterStats extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -1756,7 +1842,7 @@ class _FStat extends StatelessWidget {
         children: [
           Text(label,
               style: TextStyle(
-                  color: textColor?.withOpacity(0.4),
+                  color: textColor?.withValues(alpha: 0.4),
                   fontSize: 8,
                   fontFamily: _C.mono,
                   letterSpacing: 1.6)),
@@ -1790,6 +1876,13 @@ class _Card extends StatelessWidget {
       color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(10),
       border: Border.all(color: Theme.of(context).dividerColor),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.05),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
     ),
     child: child,
   );
@@ -1810,9 +1903,9 @@ class _Pill extends StatelessWidget {
       padding: EdgeInsets.symmetric(
           horizontal: small ? 5 : 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(.12),
+        color: color.withValues(alpha: .12),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(.25)),
+        border: Border.all(color: color.withValues(alpha: .25)),
       ),
       child: Text(
           text,

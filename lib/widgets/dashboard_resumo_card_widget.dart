@@ -19,13 +19,13 @@ class DashboardResumoCardWidget extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.05),
               blurRadius: 10,
-              offset: const Offset(0, 5),
+              offset: const Offset(0, 4),
             )
           ],
         ),
@@ -43,6 +43,7 @@ class DashboardResumoCardWidget extends StatelessWidget {
               "R\$ ${value.toStringAsFixed(2)}",
               style: TextStyle(
                 fontSize: 18,
+                fontFamily: 'monospace',
                 fontWeight: FontWeight.bold,
                 color: color,
               ),

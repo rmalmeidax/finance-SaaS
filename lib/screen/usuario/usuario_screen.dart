@@ -4,7 +4,38 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/usuario_controller.dart';
 import '../../model/usuario_model.dart';
-import '../../widgets/theme_toggle_button.dart';
+
+// ══════════════════════════════════════════════════════════════
+// DESIGN TOKENS
+// ══════════════════════════════════════════════════════════════
+abstract class _T {
+  static const teal   = Color(0xFF00BFA5);
+  static const green  = Color(0xFF43A047);
+  static const orange = Color(0xFFEF6C00);
+  static const blue   = Color(0xFF1565C0);
+  static const red    = Color(0xFFC62828);
+  static const mono   = 'monospace';
+
+  static Color corStatus(StatusUsuario s) {
+    switch (s) {
+      case StatusUsuario.ativo:     return green;
+      case StatusUsuario.pendente:  return orange;
+      case StatusUsuario.bloqueado: return const Color(0xFF9E9E9E);
+      case StatusUsuario.inativo:   return red;
+    }
+  }
+
+  static Color corPerfil(PerfilUsuario p) {
+    switch (p) {
+      case PerfilUsuario.administrador: return const Color(0xFFB39DDB);
+      case PerfilUsuario.gerente:       return const Color(0xFF4FC3F7);
+      case PerfilUsuario.operador:      return green;
+      case PerfilUsuario.visualizador:  return const Color(0xFF9E9E9E);
+    }
+  }
+
+  static String fmtInt(int v) => v.toString();
+}
 
 class UsuarioScreen extends StatelessWidget {
   const UsuarioScreen({super.key});
@@ -32,7 +63,7 @@ class UsuarioScreen extends StatelessWidget {
               width: 3,
               height: 22,
               decoration: BoxDecoration(
-                color: theme.primaryColor,
+                color: _T.teal,
                 borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
             ),
@@ -49,7 +80,6 @@ class UsuarioScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          const ThemeToggleButton(),
           Container(
             margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             decoration: BoxDecoration(
@@ -74,15 +104,22 @@ class UsuarioScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: theme.cardColor,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: theme.dividerColor),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: TextField(
                 style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Buscar por nome, e-mail, cargo ou departamento...',
                   hintStyle:
-                  TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3), fontSize: 14),
+                  TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3), fontSize: 14),
                   prefixIcon: Icon(Icons.search,
                       color: theme.primaryColor, size: 18),
                   border: InputBorder.none,
@@ -111,17 +148,17 @@ class UsuarioScreen extends StatelessWidget {
                         () => controller.setFiltroStatus(FiltroStatusU.todos)),
                 const SizedBox(width: 8),
                 _chipColor(context, 'Ativo', controller.filtroStatus == FiltroStatusU.ativo,
-                    const Color(0xFF4CAF50),
+                    _T.green,
                         () => controller.setFiltroStatus(FiltroStatusU.ativo)),
                 const SizedBox(width: 8),
                 _chipColor(context, 'Inativo',
                     controller.filtroStatus == FiltroStatusU.inativo,
-                    const Color(0xFFE53935),
+                    _T.red,
                         () => controller.setFiltroStatus(FiltroStatusU.inativo)),
                 const SizedBox(width: 8),
                 _chipColor(context, 'Pendente',
                     controller.filtroStatus == FiltroStatusU.pendente,
-                    const Color(0xFFFFB74D),
+                    _T.orange,
                         () => controller.setFiltroStatus(FiltroStatusU.pendente)),
                 const SizedBox(width: 8),
                 _chipColor(context, 'Bloqueado',
@@ -169,13 +206,13 @@ class UsuarioScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.people_outline,
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.12),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.12),
                       size: 60),
                   const SizedBox(height: 12),
                   Text(
                     'Nenhum usuário encontrado',
                     style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
                         fontSize: 14,
                         letterSpacing: 1),
                   ),
@@ -202,7 +239,7 @@ class UsuarioScreen extends StatelessWidget {
     final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        bool isWide = constraints.maxWidth > 500;
+        bool isWide = constraints.maxWidth > 600;
         
         if (isWide) {
           return Padding(
@@ -213,13 +250,13 @@ class UsuarioScreen extends StatelessWidget {
                     theme.primaryColor, Icons.people_outline),
                 const SizedBox(width: 10),
                 _dashCard(context, 'ATIVOS', '${c.totalAtivos}',
-                    const Color(0xFF4CAF50), Icons.check_circle_outline),
+                    _T.green, Icons.check_circle_outline),
                 const SizedBox(width: 10),
                 _dashCard(context, 'ADMINS', '${c.totalAdmins}',
                     const Color(0xFF4FC3F7), Icons.admin_panel_settings_outlined),
                 const SizedBox(width: 10),
                 _dashCard(context, 'PENDENTES', '${c.totalPendentes}',
-                    const Color(0xFFFFB74D), Icons.hourglass_empty_outlined),
+                    _T.orange, Icons.hourglass_empty_outlined),
               ],
             ),
           );
@@ -228,19 +265,23 @@ class UsuarioScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                _dashCard(context, 'TOTAL', '${c.usuarios.length}',
-                    theme.primaryColor, Icons.people_outline, fullWidth: true),
+                Row(
+                  children: [
+                    _dashCard(context, 'TOTAL', '${c.usuarios.length}',
+                        theme.primaryColor, Icons.people_outline),
+                    const SizedBox(width: 10),
+                    _dashCard(context, 'ATIVOS', '${c.totalAtivos}',
+                        _T.green, Icons.check_circle_outline),
+                  ],
+                ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    _dashCard(context, 'ATIVOS', '${c.totalAtivos}',
-                        const Color(0xFF4CAF50), Icons.check_circle_outline),
-                    const SizedBox(width: 10),
                     _dashCard(context, 'ADMINS', '${c.totalAdmins}',
                         const Color(0xFF4FC3F7), Icons.admin_panel_settings_outlined),
                     const SizedBox(width: 10),
                     _dashCard(context, 'PENDENTES', '${c.totalPendentes}',
-                        const Color(0xFFFFB74D), Icons.hourglass_empty_outlined),
+                        _T.orange, Icons.hourglass_empty_outlined),
                   ],
                 ),
               ],
@@ -258,7 +299,7 @@ class UsuarioScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cor.withOpacity(0.25)),
+        border: Border.all(color: cor.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +324,8 @@ class UsuarioScreen extends StatelessWidget {
               style: TextStyle(
                   color: theme.textTheme.bodyLarge?.color,
                   fontSize: 22,
-                  fontWeight: FontWeight.w800)),
+                  fontWeight: FontWeight.w800,
+                  fontFamily: _T.mono)),
         ],
       ),
     );
@@ -298,8 +340,8 @@ class UsuarioScreen extends StatelessWidget {
   Widget _buildCard(
       BuildContext context, Usuario u, UsuarioController controller) {
     final theme = Theme.of(context);
-    final statusColor = _statusColor(u.status);
-    final perfilColor = _perfilColor(u.perfil);
+    final statusColor = _T.corStatus(u.status);
+    final perfilColor = _T.corPerfil(u.perfil);
     final isAtivo = u.status == StatusUsuario.ativo;
 
     return Container(
@@ -315,7 +357,7 @@ class UsuarioScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: theme.primaryColor.withOpacity(0.05),
+              color: theme.primaryColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -331,7 +373,7 @@ class UsuarioScreen extends StatelessWidget {
                   height: 42,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [theme.primaryColor.withOpacity(0.8), theme.primaryColor],
+                      colors: [theme.primaryColor.withValues(alpha: 0.8), theme.primaryColor],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -366,7 +408,7 @@ class UsuarioScreen extends StatelessWidget {
                         Text(
                           u.cargo!,
                           style: TextStyle(
-                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
                               fontSize: 11),
                         ),
                     ],
@@ -388,13 +430,13 @@ class UsuarioScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF9800).withOpacity(0.15),
+                        color: _T.orange.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            color: const Color(0xFFFF9800).withOpacity(0.3)),
+                            color: _T.orange.withValues(alpha: 0.3)),
                       ),
                       child: const Icon(Icons.schedule,
-                          size: 12, color: Color(0xFFFF9800)),
+                          size: 12, color: _T.orange),
                     ),
                   ),
                 ],
@@ -435,7 +477,7 @@ class UsuarioScreen extends StatelessWidget {
                       context,
                       icon: Icons.edit_outlined,
                       tooltip: 'Editar',
-                      color: const Color(0xFF4FC3F7).withOpacity(0.1),
+                      color: const Color(0xFF4FC3F7).withValues(alpha: 0.1),
                       iconColor: const Color(0xFF4FC3F7),
                       onTap: () =>
                           _showDialog(context, controller, usuario: u),
@@ -447,8 +489,8 @@ class UsuarioScreen extends StatelessWidget {
                       context,
                       icon: Icons.lock_reset_outlined,
                       tooltip: 'Redefinir Senha',
-                      color: const Color(0xFFFFB74D).withOpacity(0.1),
-                      iconColor: const Color(0xFFFFB74D),
+                      color: _T.orange.withValues(alpha: 0.1),
+                      iconColor: _T.orange,
                       onTap: () => _confirmRedefinirSenha(
                           context, u, controller),
                     ),
@@ -462,11 +504,11 @@ class UsuarioScreen extends StatelessWidget {
                           : Icons.toggle_off_outlined,
                       tooltip: isAtivo ? 'Inativar' : 'Ativar',
                       color: isAtivo
-                          ? const Color(0xFFE53935).withOpacity(0.1)
-                          : const Color(0xFF4CAF50).withOpacity(0.1),
+                          ? _T.red.withValues(alpha: 0.1)
+                          : _T.green.withValues(alpha: 0.1),
                       iconColor: isAtivo
-                          ? const Color(0xFFE53935)
-                          : const Color(0xFF4CAF50),
+                          ? _T.red
+                          : _T.green,
                       onTap: () => controller.alterarStatus(
                         u.id,
                         isAtivo ? StatusUsuario.inativo : StatusUsuario.ativo,
@@ -479,8 +521,8 @@ class UsuarioScreen extends StatelessWidget {
                       context,
                       icon: Icons.person_remove_outlined,
                       tooltip: 'Excluir',
-                      color: Colors.red.withOpacity(0.1),
-                      iconColor: Colors.red.withOpacity(0.6),
+                      color: Colors.red.withValues(alpha: 0.1),
+                      iconColor: Colors.red.withValues(alpha: 0.6),
                       onTap: () =>
                           _confirmDelete(context, u, controller),
                     ),
@@ -516,11 +558,11 @@ class UsuarioScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE53935).withOpacity(0.1),
+                  color: _T.red.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.warning_amber_rounded,
-                    color: Color(0xFFE53935), size: 36),
+                    color: _T.red, size: 36),
               ),
               const SizedBox(height: 16),
               Text('Excluir Usuário',
@@ -533,7 +575,7 @@ class UsuarioScreen extends StatelessWidget {
                 'Tem certeza que deseja remover ${u.nomeCompleto} do sistema?\nEsta ação não pode ser desfeita.',
                 textAlign: TextAlign.center,
                 style:
-                TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 13),
+                TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5), fontSize: 13),
               ),
               const SizedBox(height: 24),
               Row(
@@ -544,7 +586,7 @@ class UsuarioScreen extends StatelessWidget {
                     child: _btnAcao(
                       context,
                       label: 'EXCLUIR',
-                      cor: const Color(0xFFE53935),
+                      cor: _T.red,
                       onTap: () async {
                         Navigator.pop(context);
                         await controller.excluir(u.id);
@@ -582,11 +624,11 @@ class UsuarioScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFB74D).withOpacity(0.1),
+                  color: _T.orange.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.lock_reset_outlined,
-                    color: Color(0xFFFFB74D), size: 36),
+                    color: _T.orange, size: 36),
               ),
               const SizedBox(height: 16),
               Text('Redefinir Senha',
@@ -599,7 +641,7 @@ class UsuarioScreen extends StatelessWidget {
                 'Um e-mail de redefinição de senha será enviado para:\n${u.email}',
                 textAlign: TextAlign.center,
                 style:
-                TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 13),
+                TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5), fontSize: 13),
               ),
               const SizedBox(height: 24),
               Row(
@@ -610,7 +652,7 @@ class UsuarioScreen extends StatelessWidget {
                     child: _btnAcao(
                       context,
                       label: 'ENVIAR',
-                      cor: const Color(0xFFFFB74D),
+                      cor: _T.orange,
                       onTap: () async {
                         Navigator.pop(context);
                         final ok =
@@ -753,20 +795,20 @@ class UsuarioScreen extends StatelessWidget {
                                   width: 50,
                                   decoration: BoxDecoration(
                                     color: usuario == null
-                                        ? theme.dividerColor.withOpacity(0.1)
-                                        : const Color(0xFFFFB74D),
+                                        ? theme.dividerColor.withValues(alpha: 0.1)
+                                        : _T.orange,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
                                       color: usuario == null
                                           ? theme.dividerColor
-                                          : const Color(0xFFFFB74D)
-                                          .withOpacity(0.5),
+                                          : _T.orange
+                                          .withValues(alpha: 0.5),
                                     ),
                                   ),
                                   child: Icon(
                                     Icons.lock_reset_outlined,
                                     color: usuario == null
-                                        ? theme.textTheme.bodyMedium?.color?.withOpacity(0.2)
+                                        ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.2)
                                         : Colors.black,
                                     size: 22,
                                   ),
@@ -850,7 +892,7 @@ class UsuarioScreen extends StatelessWidget {
                           runSpacing: 8,
                           children: PerfilUsuario.values.map((p) {
                             final sel = perfilSel == p;
-                            final cor = _perfilColor(p);
+                            final cor = _T.corPerfil(p);
                             return GestureDetector(
                               onTap: () =>
                                   setState(() => perfilSel = p),
@@ -859,9 +901,9 @@ class UsuarioScreen extends StatelessWidget {
                                 const Duration(milliseconds: 200),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 14, vertical: 12),
-                                decoration: BoxDecoration(
+                                  decoration: BoxDecoration(
                                   color: sel
-                                      ? cor.withOpacity(0.15)
+                                      ? cor.withValues(alpha: 0.15)
                                       : theme.scaffoldBackgroundColor,
                                   borderRadius:
                                   BorderRadius.circular(10),
@@ -882,14 +924,14 @@ class UsuarioScreen extends StatelessWidget {
                                             size: 14,
                                             color: sel
                                                 ? cor
-                                                : theme.textTheme.bodyMedium?.color?.withOpacity(0.38)),
+                                                : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.38)),
                                         const SizedBox(width: 6),
                                         Text(
                                           p.label,
                                           style: TextStyle(
                                               color: sel
                                                   ? cor
-                                                  : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                                  : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                               fontSize: 12,
                                               fontWeight: sel
                                                   ? FontWeight.w700
@@ -901,7 +943,7 @@ class UsuarioScreen extends StatelessWidget {
                                     Text(
                                       p.descricao,
                                       style: TextStyle(
-                                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
+                                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
                                           fontSize: 10),
                                     ),
                                   ],
@@ -920,7 +962,7 @@ class UsuarioScreen extends StatelessWidget {
                             children:
                             StatusUsuario.values.map((s) {
                               final sel = statusSel == s;
-                              final cor = _statusColor(s);
+                              final cor = _T.corStatus(s);
                               return Expanded(
                                 child: Padding(
                                   padding: EdgeInsets.only(
@@ -954,7 +996,7 @@ class UsuarioScreen extends StatelessWidget {
                                         style: TextStyle(
                                             color: sel
                                                 ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                                                : theme.textTheme.bodyMedium?.color?.withOpacity(0.38),
+                                                : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.38),
                                             fontSize: 10,
                                             fontWeight: sel
                                                 ? FontWeight.w800
@@ -1099,11 +1141,11 @@ class UsuarioScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  color: _T.green.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.check_circle_outline,
-                    color: Color(0xFF4CAF50), size: 36),
+                    color: _T.green, size: 36),
               ),
               const SizedBox(height: 16),
               Text('Usuário Criado!',
@@ -1116,7 +1158,7 @@ class UsuarioScreen extends StatelessWidget {
                 'Um e-mail de redefinição de senha foi enviado para $email.\n\nSenha temporária:',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 13),
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5), fontSize: 13),
               ),
               const SizedBox(height: 12),
 
@@ -1132,7 +1174,7 @@ class UsuarioScreen extends StatelessWidget {
                     color: theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                        color: theme.primaryColor.withOpacity(0.4)),
+                        color: theme.primaryColor.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1143,7 +1185,7 @@ class UsuarioScreen extends StatelessWidget {
                             color: theme.primaryColor,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
-                            fontFamily: 'monospace',
+                            fontFamily: _T.mono,
                             letterSpacing: 2),
                       ),
                       const SizedBox(width: 12),
@@ -1158,7 +1200,7 @@ class UsuarioScreen extends StatelessWidget {
                 'Toque para copiar • O usuário deve trocar no primeiro acesso',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.3), fontSize: 10),
+                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.3), fontSize: 10),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -1193,9 +1235,9 @@ class UsuarioScreen extends StatelessWidget {
         children: [
           Container(
             width: 3,
-            height: 18,
+            height: 22,
             decoration: BoxDecoration(
-              color: theme.primaryColor,
+              color: _T.teal,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1204,13 +1246,13 @@ class UsuarioScreen extends StatelessWidget {
               style: TextStyle(
                   color: theme.textTheme.titleMedium?.color,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 2,
+                  letterSpacing: 3,
                   fontSize: 14)),
           const Spacer(),
           GestureDetector(
             onTap: onClose,
             child: Icon(Icons.close,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4), size: 20),
+                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
           ),
         ],
       ),
@@ -1222,10 +1264,10 @@ class UsuarioScreen extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 2,
-          height: 12,
+          width: 3,
+          height: 16,
           decoration: BoxDecoration(
-            color: theme.primaryColor,
+            color: _T.teal,
             borderRadius: BorderRadius.circular(1),
           ),
         ),
@@ -1235,7 +1277,7 @@ class UsuarioScreen extends StatelessWidget {
                 color: theme.primaryColor,
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 2)),
+                letterSpacing: 1.5)),
       ],
     );
   }
@@ -1255,10 +1297,10 @@ class UsuarioScreen extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: enabled ? theme.scaffoldBackgroundColor : theme.dividerColor.withOpacity(0.05),
+        color: enabled ? theme.scaffoldBackgroundColor : theme.dividerColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: enabled ? theme.dividerColor : theme.dividerColor.withOpacity(0.5),
+          color: enabled ? theme.dividerColor : theme.dividerColor.withValues(alpha: 0.5),
         ),
       ),
       child: TextField(
@@ -1268,23 +1310,26 @@ class UsuarioScreen extends StatelessWidget {
         keyboardType: keyboardType,
         maxLines: obscureText ? 1 : maxLines,
         style: TextStyle(
-            color: enabled ? theme.textTheme.bodyMedium?.color : theme.textTheme.bodyMedium?.color?.withOpacity(0.38), fontSize: 14),
+            color: enabled ? theme.textTheme.bodyMedium?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.38),
+            fontSize: 14,
+            fontFamily: (label == 'Telefone' || label == 'Senha') ? _T.mono : null,
+        ),
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
           hintStyle:
-          TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.2), fontSize: 13),
+          TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.2), fontSize: 13),
           labelStyle: TextStyle(
             color: enabled
-                ? theme.textTheme.bodyMedium?.color?.withOpacity(0.35)
-                : theme.textTheme.bodyMedium?.color?.withOpacity(0.2),
+                ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.35)
+                : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.2),
             fontSize: 12,
           ),
           prefixIcon: Icon(icon,
               size: 16,
               color: enabled
                   ? theme.primaryColor
-                  : theme.textTheme.bodyMedium?.color?.withOpacity(0.2)),
+                  : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.2)),
           suffixText: suffixText,
           suffixStyle: const TextStyle(
               color: Color(0xFF4FC3F7), fontSize: 10),
@@ -1304,9 +1349,9 @@ class UsuarioScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: cor.withOpacity(0.07),
+        color: cor.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: cor.withOpacity(0.2)),
+        border: Border.all(color: cor.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -1333,14 +1378,17 @@ class UsuarioScreen extends StatelessWidget {
               const SizedBox(width: 4),
               Text(label,
                   style: TextStyle(
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.35),
+                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
                       fontSize: 9,
                       letterSpacing: 1)),
             ],
           ),
           const SizedBox(height: 3),
           Text(value,
-              style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12),
+              style: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color,
+                  fontSize: 12,
+                  fontFamily: label == 'TELEFONE' ? _T.mono : null),
               overflow: TextOverflow.ellipsis),
         ],
       ),
@@ -1366,7 +1414,7 @@ class UsuarioScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: iconColor.withOpacity(0.2)),
+            border: Border.all(color: iconColor.withValues(alpha: 0.2)),
           ),
           child: Icon(icon, size: 17, color: iconColor),
         ),
@@ -1378,9 +1426,9 @@ class UsuarioScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: cor.withOpacity(0.12),
+        color: cor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: cor.withOpacity(0.3)),
+        border: Border.all(color: cor.withValues(alpha: 0.3)),
       ),
       child: Text(texto,
           style: TextStyle(
@@ -1407,7 +1455,7 @@ class UsuarioScreen extends StatelessWidget {
         ),
         child: Text(label,
             style: TextStyle(
-                color: selected ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+                color: selected ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                 fontSize: 11,
                 fontWeight:
                 selected ? FontWeight.w700 : FontWeight.w400,
@@ -1432,7 +1480,7 @@ class UsuarioScreen extends StatelessWidget {
         ),
         child: Text(label,
             style: TextStyle(
-                color: selected ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+                color: selected ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                 fontSize: 11,
                 fontWeight:
                 selected ? FontWeight.w700 : FontWeight.w400)),
@@ -1447,17 +1495,17 @@ class UsuarioScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: theme.dividerColor.withOpacity(0.05),
+          color: theme.dividerColor.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: theme.dividerColor),
         ),
         child: Text('CANCELAR',
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                letterSpacing: 1)),
+                letterSpacing: 1.5)),
       ),
     );
   }
@@ -1473,7 +1521,7 @@ class UsuarioScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: onTap == null ? cor.withOpacity(0.4) : cor,
+          color: onTap == null ? cor.withValues(alpha: 0.4) : cor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(label,
@@ -1495,7 +1543,7 @@ class UsuarioScreen extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(child: Text(msg)),
       ]),
-      backgroundColor: erro ? const Color(0xFFE53935) : const Color(0xFF4CAF50),
+      backgroundColor: erro ? _T.red : _T.green,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       margin: const EdgeInsets.all(16),
@@ -1503,43 +1551,5 @@ class UsuarioScreen extends StatelessWidget {
   }
 
   // ── Cores por perfil / status ─────────────────────────────
-
-  Color _perfilColor(PerfilUsuario p) {
-    switch (p) {
-      case PerfilUsuario.administrador:
-        return const Color(0xFFB39DDB);
-      case PerfilUsuario.gerente:
-        return const Color(0xFF4FC3F7);
-      case PerfilUsuario.operador:
-        return const Color(0xFF4CAF50);
-      case PerfilUsuario.visualizador:
-        return const Color(0xFF9E9E9E);
-    }
-  }
-
-  IconData _perfilIcon(PerfilUsuario p) {
-    switch (p) {
-      case PerfilUsuario.administrador:
-        return Icons.admin_panel_settings_outlined;
-      case PerfilUsuario.gerente:
-        return Icons.manage_accounts_outlined;
-      case PerfilUsuario.operador:
-        return Icons.person_outlined;
-      case PerfilUsuario.visualizador:
-        return Icons.visibility_outlined;
-    }
-  }
-
-  Color _statusColor(StatusUsuario s) {
-    switch (s) {
-      case StatusUsuario.ativo:
-        return const Color(0xFF4CAF50);
-      case StatusUsuario.inativo:
-        return const Color(0xFFE53935);
-      case StatusUsuario.bloqueado:
-        return const Color(0xFF9E9E9E);
-      case StatusUsuario.pendente:
-        return const Color(0xFFFFB74D);
-    }
-  }
+  // (Removidos _perfilColor e _statusColor pois agora usamos _T)
 }

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/fornecedor_controller.dart';
 import '../../model/fornecedor_model.dart';
-import '../../widgets/theme_toggle_button.dart';
 
 class FornecedorScreen extends StatelessWidget {
   const FornecedorScreen({super.key});
@@ -29,7 +28,7 @@ class FornecedorScreen extends StatelessWidget {
               width: 3,
               height: 22,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: const Color(0xFF00BFA5),
                 borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
             ),
@@ -46,7 +45,6 @@ class FornecedorScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          const ThemeToggleButton(),
           Container(
             margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             decoration: BoxDecoration(
@@ -87,7 +85,7 @@ class FornecedorScreen extends StatelessWidget {
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.3),
+                          ?.withValues(alpha: 0.3),
                       fontSize: 14),
                   prefixIcon: Icon(Icons.search,
                       color: Theme.of(context).primaryColor, size: 18),
@@ -166,7 +164,7 @@ class FornecedorScreen extends StatelessWidget {
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.12),
+                          ?.withValues(alpha: 0.12),
                       size: 60),
                   const SizedBox(height: 12),
                   Text(
@@ -176,7 +174,7 @@ class FornecedorScreen extends StatelessWidget {
                             .textTheme
                             .bodyMedium
                             ?.color
-                            ?.withOpacity(0.3),
+                            ?.withValues(alpha: 0.3),
                         fontSize: 14,
                         letterSpacing: 1),
                   ),
@@ -257,7 +255,14 @@ class FornecedorScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cor.withOpacity(0.25)),
+        border: Border.all(color: cor.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,6 +276,7 @@ class FornecedorScreen extends StatelessWidget {
                       color: cor,
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
+                      fontFamily: 'monospace',
                       letterSpacing: 1.5)),
             ],
           ),
@@ -279,6 +285,7 @@ class FornecedorScreen extends StatelessWidget {
               style: TextStyle(
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                   fontSize: 22,
+                  fontFamily: 'monospace',
                   fontWeight: FontWeight.w800)),
         ],
       ),
@@ -303,6 +310,13 @@ class FornecedorScreen extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Theme.of(context).dividerColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -311,7 +325,7 @@ class FornecedorScreen extends StatelessWidget {
             padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.05),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -326,7 +340,7 @@ class FornecedorScreen extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.12),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -358,7 +372,7 @@ class FornecedorScreen extends StatelessWidget {
                       if (f.fantasia.isNotEmpty)
                         Text(f.fantasia,
                             style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
                                 fontSize: 11)),
                     ],
                   ),
@@ -368,9 +382,9 @@ class FornecedorScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: tipoColor.withOpacity(0.12),
+                    color: tipoColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: tipoColor.withOpacity(0.3)),
+                    border: Border.all(color: tipoColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     isPj ? "PJ" : "PF",
@@ -385,10 +399,10 @@ class FornecedorScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                     border:
-                    Border.all(color: statusColor.withOpacity(0.3)),
+                    Border.all(color: statusColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     f.status.toUpperCase(),
@@ -446,7 +460,7 @@ class FornecedorScreen extends StatelessWidget {
                       context: context,
                       icon: Icons.edit_outlined,
                       tooltip: "Editar",
-                      color: const Color(0xFF4FC3F7).withOpacity(0.1),
+                      color: const Color(0xFF4FC3F7).withValues(alpha: 0.1),
                       iconColor: const Color(0xFF4FC3F7),
                       onTap: () =>
                           _showDialog(context, controller, fornecedor: f),
@@ -459,7 +473,7 @@ class FornecedorScreen extends StatelessWidget {
                           ? Icons.toggle_on_outlined
                           : Icons.toggle_off_outlined,
                       tooltip: isAtivo ? "Inativar" : "Ativar",
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       iconColor: statusColor,
                       onTap: () async {
                         await controller.alterarStatus(
@@ -472,8 +486,8 @@ class FornecedorScreen extends StatelessWidget {
                       context: context,
                       icon: Icons.delete_outline,
                       tooltip: "Excluir",
-                      color: Colors.red.withOpacity(0.1),
-                      iconColor: Colors.red.withOpacity(0.6),
+                      color: Colors.red.withValues(alpha: 0.1),
+                      iconColor: Colors.red.withValues(alpha: 0.6),
                       onTap: () => _confirmDelete(context, f, controller),
                     ),
                   ],
@@ -497,14 +511,17 @@ class FornecedorScreen extends StatelessWidget {
               const SizedBox(width: 4),
               Text(label,
                   style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.35),
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
                       fontSize: 9,
                       letterSpacing: 1)),
             ],
           ),
           const SizedBox(height: 3),
           Text(value,
-              style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 12),
+              style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  fontSize: 12,
+                  fontFamily: 'monospace'),
               overflow: TextOverflow.ellipsis),
         ],
       ),
@@ -530,7 +547,7 @@ class FornecedorScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: iconColor.withOpacity(0.2)),
+            border: Border.all(color: iconColor.withValues(alpha: 0.2)),
           ),
           child: Icon(icon, size: 17, color: iconColor),
         ),
@@ -559,7 +576,7 @@ class FornecedorScreen extends StatelessWidget {
         ),
         child: Text(label,
             style: TextStyle(
-                color: selected ? onPrimary : theme.textTheme.bodyMedium?.color?.withOpacity(0.54),
+                color: selected ? onPrimary : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                 fontSize: 11,
                 fontWeight:
                 selected ? FontWeight.w700 : FontWeight.w400,
@@ -586,7 +603,7 @@ class FornecedorScreen extends StatelessWidget {
         ),
         child: Text(label,
             style: TextStyle(
-                color: selected ? onCor : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                color: selected ? onCor : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                 fontSize: 11,
                 fontWeight:
                 selected ? FontWeight.w700 : FontWeight.w400)),
@@ -621,7 +638,7 @@ class FornecedorScreen extends StatelessWidget {
               Text("Tem certeza que deseja excluir ${f.nome}?",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 13)),
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5), fontSize: 13)),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -640,7 +657,7 @@ class FornecedorScreen extends StatelessWidget {
                         child: Text("CANCELAR",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1)),
@@ -765,7 +782,7 @@ class FornecedorScreen extends StatelessWidget {
                         width: 3,
                         height: 18,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
+                          color: const Color(0xFF00BFA5),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -785,7 +802,7 @@ class FornecedorScreen extends StatelessWidget {
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Icon(Icons.close,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4), size: 20),
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
                       ),
                     ],
                   ),
@@ -835,7 +852,7 @@ class FornecedorScreen extends StatelessWidget {
                                           size: 16,
                                           color: tipo == TipoPessoa.juridica
                                               ? (Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                                              : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54)),
+                                              : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54)),
                                       const SizedBox(width: 6),
                                       Text(
                                         "Pessoa Jurídica",
@@ -843,7 +860,7 @@ class FornecedorScreen extends StatelessWidget {
                                             color:
                                             tipo == TipoPessoa.juridica
                                                 ? (Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                                                : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                                : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                             fontWeight: FontWeight.w700,
                                             fontSize: 12),
                                       ),
@@ -885,14 +902,14 @@ class FornecedorScreen extends StatelessWidget {
                                           size: 16,
                                           color: tipo == TipoPessoa.fisica
                                               ? Colors.black
-                                              : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54)),
+                                              : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54)),
                                       const SizedBox(width: 6),
                                       Text(
                                         "Pessoa Física",
                                         style: TextStyle(
                                             color: tipo == TipoPessoa.fisica
                                                 ? Colors.black
-                                                : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                                : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                             fontWeight: FontWeight.w700,
                                             fontSize: 12),
                                       ),
@@ -957,11 +974,11 @@ class FornecedorScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
+                              color: Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                   color: const Color(0xFFE53935)
-                                      .withOpacity(0.3)),
+                                      .withValues(alpha: 0.3)),
                             ),
                             child: Row(
                               children: [
@@ -985,11 +1002,11 @@ class FornecedorScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF4FC3F7).withOpacity(0.1),
+                              color: const Color(0xFF4FC3F7).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                   color: const Color(0xFF4FC3F7)
-                                      .withOpacity(0.2)),
+                                      .withValues(alpha: 0.2)),
                             ),
                             child: Row(
                               children: [
@@ -1125,7 +1142,7 @@ class FornecedorScreen extends StatelessWidget {
                             child: Text("CANCELAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 1.5)),
@@ -1196,20 +1213,20 @@ class FornecedorScreen extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 2,
-          height: 12,
+          width: 3,
+          height: 16,
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.circular(1),
+            color: const Color(0xFF00BFA5),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 8),
         Text(label,
-            style: TextStyle(
-                color: Theme.of(context).primaryColor,
+            style: const TextStyle(
+                color: Color(0xFF00BFA5),
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 2)),
+                letterSpacing: 1.5)),
       ],
     );
   }
@@ -1223,7 +1240,7 @@ class FornecedorScreen extends StatelessWidget {
       }) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+        color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Theme.of(context).dividerColor),
       ),
@@ -1231,7 +1248,10 @@ class FornecedorScreen extends StatelessWidget {
         controller: ctrl,
         keyboardType: keyboardType,
         style: TextStyle(
-            color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 14),
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 14,
+            fontFamily: (keyboardType == TextInputType.number || keyboardType == TextInputType.phone) ? 'monospace' : null
+        ),
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(
@@ -1239,7 +1259,7 @@ class FornecedorScreen extends StatelessWidget {
                   .textTheme
                   .bodyMedium
                   ?.color
-                  ?.withOpacity(0.35),
+                  ?.withValues(alpha: 0.35),
               fontSize: 12),
           prefixIcon:
               Icon(icon, size: 16, color: Theme.of(context).primaryColor),

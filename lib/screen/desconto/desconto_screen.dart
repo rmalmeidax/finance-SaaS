@@ -99,6 +99,10 @@ class _DescontoScreenState extends State<DescontoScreen>
       ),
       body: Column(
         children: [
+          // ── Dashboard ──
+          const _DescontoDashboard(),
+          const SizedBox(height: 2),
+
           // ── Form de lançamento (expansível) ──
           AnimatedSize(
             duration: const Duration(milliseconds: 320),
@@ -109,10 +113,6 @@ class _DescontoScreenState extends State<DescontoScreen>
             )
                 : const SizedBox.shrink(),
           ),
-
-          // ── Dashboard ──
-          const _DescontoDashboard(),
-          const SizedBox(height: 2),
 
           // ── TabBar ──
           _DescontoTabBar(controller: _tab),
@@ -171,11 +171,14 @@ class _DescontoAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
           // Barra teal
-          Container(
-            width: 2, height: 18,
-            decoration: BoxDecoration(
-                color: _T.teal, borderRadius: BorderRadius.circular(2)),
-          ),
+            Container(
+              width: 3,
+              height: 22,
+              decoration: BoxDecoration(
+                color: _T.teal,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
           const SizedBox(width: 10),
           Text(
             'DESCONTO DE TÍTULOS',
@@ -183,8 +186,7 @@ class _DescontoAppBar extends StatelessWidget implements PreferredSizeWidget {
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: textColor,
-              letterSpacing: 1.8,
-              fontFamily: _T.mono,
+              letterSpacing: 3,
             ),
           ),
           const Spacer(),
@@ -218,10 +220,11 @@ class _DescontoAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      formAberto ? 'Fechar' : 'Inserir Título',
+                      formAberto ? 'FECHAR' : 'INSERIR TÍTULO',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
                         color: formAberto
                             ? textColor
                             : (theme.primaryColor.computeLuminance() > 0.5
@@ -310,7 +313,7 @@ class _DescontoFormCardState extends State<_DescontoFormCard> {
               Row(
                 children: [
                   Container(
-                    width: 3, height: 14,
+                    width: 3, height: 16,
                     decoration: BoxDecoration(
                       color: _T.teal,
                       borderRadius: BorderRadius.circular(2),
@@ -324,7 +327,6 @@ class _DescontoFormCardState extends State<_DescontoFormCard> {
                       fontWeight: FontWeight.w700,
                       color: textColor?.withValues(alpha: 0.5),
                       letterSpacing: 1.5,
-                      fontFamily: _T.mono,
                     ),
                   ),
                 ],
@@ -477,13 +479,18 @@ class _DescontoFormCardState extends State<_DescontoFormCard> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Text('Limpar', style: TextStyle(fontSize: 12)),
+                      child: Text("LIMPAR",
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.5,
+                            color: textColor?.withValues(alpha: 0.5))),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton.icon(
                       onPressed: _submeter,
                       icon: const Icon(Icons.upload_file_outlined, size: 16),
-                      label: const Text('Inserir Título'),
+                      label: const Text('SALVAR TÍTULO'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.primaryColor,
                         foregroundColor: theme.primaryColor.computeLuminance() > 0.5
@@ -491,7 +498,7 @@ class _DescontoFormCardState extends State<_DescontoFormCard> {
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1.5),
                       ),
                     ),
                   ],
@@ -663,40 +670,54 @@ class _DescontoDashboard extends StatelessWidget {
 
     return Container(
       color: theme.cardColor,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Row(children: [
-        _DashTile(
-          label: 'LÍQUIDO TOTAL',
-          valor: _T.fmtMoeda(resumo?.totalLiquido ?? 0),
-          cor: _T.teal,
-          icon: Icons.account_balance_wallet_outlined,
-          flex: 3,
-        ),
-        const SizedBox(width: 10),
-        _DashTile(
-          label: 'NOMINAL',
-          valor: _T.fmtMoeda(resumo?.totalNominal ?? 0),
-          cor: _T.blue,
-          icon: Icons.description_outlined,
-          flex: 3,
-        ),
-        const SizedBox(width: 10),
-        _DashTile(
-          label: 'ATIVOS',
-          valor: '${resumo?.ativos ?? 0}',
-          cor: _T.green,
-          icon: Icons.check_circle_outline,
-          flex: 2,
-        ),
-        const SizedBox(width: 10),
-        _DashTile(
-          label: 'EXPIRAM',
-          valor: '${resumo?.expirando ?? 0}',
-          cor: _T.orange,
-          icon: Icons.timer_outlined,
-          flex: 2,
-        ),
-      ]),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Column(
+        children: [
+          // Linha Principal (Líquido e Nominal)
+          Row(
+            children: [
+              _DashTile(
+                label: 'LÍQUIDO TOTAL',
+                valor: _T.fmtMoeda(resumo?.totalLiquido ?? 0),
+                cor: _T.teal,
+                icon: Icons.account_balance_wallet_outlined,
+                flex: 1,
+              ),
+              const SizedBox(width: 8),
+              _DashTile(
+                label: 'VALOR NOMINAL',
+                valor: _T.fmtMoeda(resumo?.totalNominal ?? 0),
+                cor: _T.blue,
+                icon: Icons.description_outlined,
+                flex: 1,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Linha de Status (Ativos e Expiram)
+          Row(
+            children: [
+              _DashTile(
+                label: 'TÍTULOS ATIVOS',
+                valor: '${resumo?.ativos ?? 0}',
+                cor: _T.green,
+                icon: Icons.check_circle_outline,
+                flex: 1,
+                compact: true,
+              ),
+              const SizedBox(width: 8),
+              _DashTile(
+                label: 'EXPIRAM LOGO',
+                valor: '${resumo?.expirando ?? 0}',
+                cor: _T.orange,
+                icon: Icons.timer_outlined,
+                flex: 1,
+                compact: true,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -706,10 +727,13 @@ class _DashTile extends StatelessWidget {
   final Color cor;
   final IconData icon;
   final int flex;
+  final bool compact;
 
   const _DashTile({
     required this.label, required this.valor,
-    required this.cor, required this.icon, this.flex = 1,
+    required this.cor, required this.icon, 
+    this.flex = 1,
+    this.compact = false,
   });
 
   @override
@@ -718,11 +742,18 @@ class _DashTile extends StatelessWidget {
     return Expanded(
       flex: flex,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(compact ? 10 : 12),
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: cor.withValues(alpha: 0.2)),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: cor.withValues(alpha: 0.15)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,21 +767,22 @@ class _DashTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 8, color: cor,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
+                      letterSpacing: 0.5,
                       fontFamily: _T.mono,
                     )),
               ),
             ]),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(valor,
                   style: TextStyle(
-                    fontSize: flex >= 3 ? 14 : 18,
+                    fontSize: compact ? 14 : 16,
                     fontWeight: FontWeight.w800,
                     color: theme.textTheme.bodyMedium?.color,
-                    letterSpacing: -0.3,
+                    letterSpacing: -0.5,
+                    fontFamily: _T.mono,
                   )),
             ),
           ],
@@ -789,62 +821,65 @@ class _DescontoTabBarState extends State<_DescontoTabBar> {
             unselectedLabelColor: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
             labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
             tabs: const [
-              Tab(text: 'GRID DE TÍTULOS'),
+              Tab(text: 'GRID'),
               Tab(text: 'DETALHES'),
             ],
           ),
           // Filtros + busca
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-            child: Row(
+            child: Column(
               children: [
-                // Filtros chips
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(children: [
-                      _FChip(label: 'Todos',     status: null,                    ctrl: ctrl),
-                      const SizedBox(width: 6),
-                      _FChip(label: 'Ativos',    status: DescontoStatus.ativo,    ctrl: ctrl),
-                      const SizedBox(width: 6),
-                      _FChip(label: 'Expirando', status: DescontoStatus.expirando, ctrl: ctrl),
-                      const SizedBox(width: 6),
-                      _FChip(label: 'Agendados', status: DescontoStatus.agendado, ctrl: ctrl),
-                    ]),
-                  ),
-                ),
-                // Busca compacta
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 180,
-                  height: 34,
-                  child: TextField(
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: theme.textTheme.bodyMedium?.color),
-                    decoration: InputDecoration(
-                      hintText: 'Buscar...',
-                      hintStyle: TextStyle(
-                          fontSize: 12,
-                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3)),
-                      prefixIcon: Icon(Icons.search,
-                          size: 16, color: theme.primaryColor),
-                      isDense: true,
-                      filled: true,
-                      fillColor: theme.scaffoldBackgroundColor,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: theme.dividerColor)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: theme.dividerColor)),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: theme.primaryColor, width: 1.2)),
+                Row(
+                  children: [
+                    // Busca compacta
+                    Expanded(
+                      child: SizedBox(
+                        height: 36,
+                        child: TextField(
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: theme.textTheme.bodyMedium?.color),
+                          decoration: InputDecoration(
+                            hintText: 'Buscar por documento ou cliente...',
+                            hintStyle: TextStyle(
+                                fontSize: 11,
+                                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3)),
+                            prefixIcon: Icon(Icons.search,
+                                size: 16, color: theme.primaryColor),
+                            isDense: true,
+                            filled: true,
+                            fillColor: theme.scaffoldBackgroundColor,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: theme.dividerColor)),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: theme.dividerColor)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: theme.primaryColor, width: 1.2)),
+                          ),
+                          onChanged: ctrl.setBusca,
+                        ),
+                      ),
                     ),
-                    onChanged: ctrl.setBusca,
-                  ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Filtros chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(children: [
+                    _FChip(label: 'Todos',     status: null,                    ctrl: ctrl),
+                    const SizedBox(width: 6),
+                    _FChip(label: 'Ativos',    status: DescontoStatus.ativo,    ctrl: ctrl),
+                    const SizedBox(width: 6),
+                    _FChip(label: 'Expirando', status: DescontoStatus.expirando, ctrl: ctrl),
+                    const SizedBox(width: 6),
+                    _FChip(label: 'Agendados', status: DescontoStatus.agendado, ctrl: ctrl),
+                  ]),
                 ),
               ],
             ),
@@ -892,22 +927,19 @@ class _FChip extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════
-// GRID VIEW — tabela estilo banco
+// GRID VIEW — tabela estilo banco (Scroll Horizontal para Mobile)
 // ══════════════════════════════════════════════════════════════
 class _DescontoGridView extends StatelessWidget {
   const _DescontoGridView();
 
   static const _cols = [
-    ('Nº DOC.',    3),
-    ('TIPO',       2),
-    ('EMISSÃO',    2),
-    ('VENCIMENTO', 2),
-    ('NOMINAL',    3),
-    ('TAXA DESC.', 2),
-    ('IOF',        2),
-    ('LÍQUIDO',    3),
-    ('STATUS',     2),
-    ('',           1), // ações
+    ('Nº DOC.',    140),
+    ('TIPO',       100),
+    ('VENC.',      90),
+    ('NOMINAL',    110),
+    ('LÍQUIDO',    110),
+    ('STATUS',     100),
+    ('',           40),
   ];
 
   @override
@@ -921,43 +953,51 @@ class _DescontoGridView extends StatelessWidget {
     }
     if (state.estaVazio) return const _EmptyState();
 
-    return Column(
-      children: [
-        // ── Cabeçalho da tabela ──
-        Container(
-          color: theme.scaffoldBackgroundColor,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-          child: Row(
-            children: _cols.map((c) => Expanded(
-              flex: c.$2,
-              child: Text(c.$1,
-                  style: TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
-                    color: textColor?.withValues(alpha: 0.35),
-                    letterSpacing: 0.8,
-                    fontFamily: _T.mono,
-                  )),
-            )).toList(),
-          ),
-        ),
-        Divider(height: 1, color: theme.dividerColor),
-        // ── Linhas ──
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.only(bottom: 24),
-            itemCount: state.descontos.length,
-            separatorBuilder: (_, __) => Divider(
-                height: 1, color: theme.dividerColor.withValues(alpha: 0.6)),
-            itemBuilder: (_, i) => _GridRow(
-              desconto: state.descontos[i],
-              onExcluir: () => context
-                  .read<DescontoController>()
-                  .excluirDesconto(state.descontos[i].id),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: SizedBox(
+        width: 690, // Soma das larguras fixas
+        child: Column(
+          children: [
+            // ── Cabeçalho da tabela ──
+            Container(
+              color: theme.scaffoldBackgroundColor,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: _cols.map((c) => SizedBox(
+                  width: c.$2.toDouble(),
+                  child: Text(c.$1,
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w700,
+                        color: textColor?.withValues(alpha: 0.35),
+                        letterSpacing: 0.8,
+                        fontFamily: _T.mono,
+                      )),
+                )).toList(),
+              ),
             ),
-          ),
+            Divider(height: 1, color: theme.dividerColor),
+            // ── Linhas ──
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.only(bottom: 24),
+                itemCount: state.descontos.length,
+                separatorBuilder: (_, __) => Divider(
+                    height: 1, color: theme.dividerColor.withValues(alpha: 0.6)),
+                itemBuilder: (_, i) => _GridRow(
+                  desconto: state.descontos[i],
+                  onExcluir: () => context
+                      .read<DescontoController>()
+                      .excluirDesconto(state.descontos[i].id),
+                  cols: _cols,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -965,15 +1005,14 @@ class _DescontoGridView extends StatelessWidget {
 class _GridRow extends StatelessWidget {
   final DescontoModel desconto;
   final VoidCallback onExcluir;
-  const _GridRow({required this.desconto, required this.onExcluir});
+  final List<(String, int)> cols;
+  const _GridRow({required this.desconto, required this.onExcluir, required this.cols});
 
   @override
   Widget build(BuildContext context) {
     final d       = desconto;
     final theme   = Theme.of(context);
     final tc      = theme.textTheme.bodyMedium?.color;
-    final corS    = _T.corStatus(d.status);
-    final corT    = _T.corTipo(d.tipoDocumento);
     final opac    = d.status == DescontoStatus.expirado ? 0.5 : 1.0;
 
     return Opacity(
@@ -981,58 +1020,43 @@ class _GridRow extends StatelessWidget {
       child: InkWell(
         onTap: () {},
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // Nº Doc
-              Expanded(flex: 3, child: Column(
+              // Nº Doc + Cliente
+              SizedBox(width: cols[0].$2.toDouble(), child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(d.numeroDocumento,
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
                       style: TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w600, color: tc)),
+                          fontSize: 11, fontWeight: FontWeight.w600, 
+                          color: tc, fontFamily: _T.mono)),
                   Text(d.nomeCliente,
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
                       style: TextStyle(
                           fontSize: 9, color: tc?.withValues(alpha: 0.4),
                           fontFamily: _T.mono)),
                 ],
               )),
               // Tipo
-              Expanded(flex: 2, child: _TipoBadge(tipo: d.tipoDocumento)),
-              // Emissão
-              Expanded(flex: 2, child: Text(_T.fmtData(d.dataEmissao),
-                  style: TextStyle(fontSize: 10, color: tc?.withValues(alpha: 0.6),
-                      fontFamily: _T.mono))),
+              SizedBox(width: cols[1].$2.toDouble(), child: _TipoBadge(tipo: d.tipoDocumento)),
               // Vencimento
-              Expanded(flex: 2, child: Text(_T.fmtData(d.dataVencimento),
+              SizedBox(width: cols[2].$2.toDouble(), child: Text(_T.fmtData(d.dataVencimento),
                   style: TextStyle(fontSize: 10, color: tc?.withValues(alpha: 0.6),
                       fontFamily: _T.mono))),
               // Nominal
-              Expanded(flex: 3, child: Text(_T.fmtMoeda(d.valorNominal),
-                  overflow: TextOverflow.ellipsis,
+              SizedBox(width: cols[3].$2.toDouble(), child: Text(_T.fmtMoeda(d.valorNominal),
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600,
                       color: tc, fontFamily: _T.mono))),
-              // Taxa desconto
-              Expanded(flex: 2, child: Text(_T.fmtPct(d.taxaDesconto),
-                  style: TextStyle(fontSize: 10, color: _T.orange,
-                      fontFamily: _T.mono, fontWeight: FontWeight.w600))),
-              // IOF
-              Expanded(flex: 2, child: Text(_T.fmtPct(d.taxaIof),
-                  style: TextStyle(fontSize: 10, color: tc?.withValues(alpha: 0.5),
-                      fontFamily: _T.mono))),
               // Líquido
-              Expanded(flex: 3, child: Text(_T.fmtMoeda(d.valorLiquido),
-                  overflow: TextOverflow.ellipsis,
+              SizedBox(width: cols[4].$2.toDouble(), child: Text(_T.fmtMoeda(d.valorLiquido),
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
                       color: _T.green, fontFamily: _T.mono))),
               // Status
-              Expanded(flex: 2, child: _StatusBadge(status: d.status)),
+              SizedBox(width: cols[5].$2.toDouble(), child: _StatusBadge(status: d.status)),
               // Ações
-              Expanded(flex: 1, child: GestureDetector(
+              SizedBox(width: cols[6].$2.toDouble(), child: GestureDetector(
                 onTap: onExcluir,
                 child: Icon(Icons.close, size: 14,
                     color: tc?.withValues(alpha: 0.25)),
@@ -1095,6 +1119,13 @@ class _DetalheCard extends StatelessWidget {
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: theme.dividerColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Material(
           color: Colors.transparent,
@@ -1270,6 +1301,7 @@ class _DetalheItem extends StatelessWidget {
               color: color,
               decoration: tachado ? TextDecoration.lineThrough : null,
               decorationColor: color,
+              fontFamily: _T.mono,
             )),
       ],
     ),
