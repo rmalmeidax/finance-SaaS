@@ -1,4 +1,4 @@
-// lib/controllers/investment_controller.dart
+// lib/relatorio_controller/investment_controller.dart
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';

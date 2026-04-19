@@ -1,105 +1,128 @@
-import 'package:flutter/material.dart';
+// lib/features/desconto/controller/desconto_controller.dart
+
+import 'package:flutter/foundation.dart';
 import '../model/desconto_model.dart';
 import '../services/desconto_service.dart';
 
+
 class DescontoState {
   final List<DescontoModel> descontos;
+  final DescontoResumo? resumo;
+  final DescontoStatus? filtroAtivo;
+  final String busca;
   final bool carregando;
   final String? erro;
-  final DescontoStatus? filtroAtivo;
-  final DescontoResumo? resumo;
 
-  DescontoState({
-    this.descontos = const [],
-    this.carregando = false,
-    this.erro,
-    this.filtroAtivo,
+  const DescontoState({
+    this.descontos   = const [],
     this.resumo,
+    this.filtroAtivo,
+    this.busca       = '',
+    this.carregando  = false,
+    this.erro,
   });
+
+  DescontoState copyWith({
+    List<DescontoModel>? descontos,
+    DescontoResumo?      resumo,
+    DescontoStatus?      filtroAtivo,
+    String?              busca,
+    bool?                carregando,
+    String?              erro,
+    bool                 limparErro    = false,
+    bool                 limparFiltro  = false,
+  }) {
+    return DescontoState(
+      descontos:   descontos   ?? this.descontos,
+      resumo:      resumo      ?? this.resumo,
+      filtroAtivo: limparFiltro ? null : (filtroAtivo ?? this.filtroAtivo),
+      busca:       busca       ?? this.busca,
+      carregando:  carregando  ?? this.carregando,
+      erro:        limparErro  ? null : (erro ?? this.erro),
+    );
+  }
+
+  bool get temErro   => erro != null;
+  bool get estaVazio => !carregando && descontos.isEmpty;
+  int  get total     => descontos.length;
 }
 
 class DescontoController extends ChangeNotifier {
-  final DescontoService _service;
+  final IDescontoService _service;
 
-  DescontoState _state = DescontoState();
-  List<DescontoModel> _todosDescontos = []; // Backup para busca
-  String _termoBusca = "";
+  DescontoController({IDescontoService? service})
+      : _service = service ?? DescontoService();
 
-  DescontoController(this._service);
-
+  DescontoState _state = const DescontoState();
   DescontoState get state => _state;
 
+  void _emit(DescontoState s) { _state = s; notifyListeners(); }
+  void _setCarregando() => _emit(_state.copyWith(carregando: true, limparErro: true));
+  void _setErro(Object e) => _emit(_state.copyWith(carregando: false, erro: e.toString()));
+
+  // ── Ações ────────────────────────────────────────────────
+
   Future<void> carregarDescontos() async {
-    _updateState(carregando: true);
+    _setCarregando();
     try {
-      _todosDescontos = await _service.fetchDescontos();
-      _filtrarEProcessar();
+      final resultados = await Future.wait([
+        _service.filtrarPorStatus(_state.filtroAtivo),
+        _service.obterResumo(),
+      ]);
+      var lista = resultados[0] as List<DescontoModel>;
+
+      // Aplicar busca local
+      if (_state.busca.isNotEmpty) {
+        final q = _state.busca.toLowerCase();
+        lista = lista.where((d) =>
+        d.numeroDocumento.toLowerCase().contains(q) ||
+            d.nomeCliente.toLowerCase().contains(q) ||
+            d.tipoDocumento.label.toLowerCase().contains(q),
+        ).toList();
+      }
+
+      _emit(_state.copyWith(
+        descontos:  lista,
+        resumo:     resultados[1] as DescontoResumo,
+        carregando: false,
+      ));
     } catch (e) {
-      _updateState(carregando: false, erro: 'Falha ao carregar dados.');
+      _setErro(e);
     }
   }
 
-  // Define o termo de busca vindo do TextField
+  Future<void> aplicarFiltro(DescontoStatus? status) async {
+    _emit(_state.copyWith(
+      filtroAtivo:  status,
+      limparFiltro: status == null,
+    ));
+    await carregarDescontos();
+  }
+
   void setBusca(String valor) {
-    _termoBusca = valor.toLowerCase();
-    _filtrarEProcessar();
+    _emit(_state.copyWith(busca: valor));
+    carregarDescontos();
   }
 
-  // Aplica o filtro de status (Ativo, Expirando, etc)
-  void aplicarFiltro(DescontoStatus? status) {
-    _state = DescontoState(
-      descontos: _state.descontos,
-      carregando: _state.carregando,
-      filtroAtivo: status,
-      resumo: _state.resumo,
-    );
-    _filtrarEProcessar();
-  }
-
-  void _filtrarEProcessar() {
-    // Filtragem combinada: Status + Busca
-    final filtrados = _todosDescontos.where((d) {
-      final bateStatus = _state.filtroAtivo == null || d.status == _state.filtroAtivo;
-      final bateBusca = d.titulo.toLowerCase().contains(_termoBusca) ||
-          d.nomeCliente.toLowerCase().contains(_termoBusca);
-      return bateStatus && bateBusca;
-    }).toList();
-
-    // Cálculos de Resumo
-    double bruto = 0;
-    double liquido = 0;
-    int ativos = 0;
-    int exp = 0;
-
-    for (var item in filtrados) {
-      bruto += item.valorNominal;
-      liquido += item.valorLiquido;
-      if (item.status == DescontoStatus.ativo) ativos++;
-      if (item.status == DescontoStatus.expirando) exp++;
+  Future<void> inserirTitulo(DescontoModel desconto) async {
+    _setCarregando();
+    try {
+      await _service.criar(desconto);
+      await carregarDescontos();
+    } catch (e) {
+      _setErro(e);
     }
-
-    _state = DescontoState(
-      descontos: filtrados,
-      carregando: false,
-      filtroAtivo: _state.filtroAtivo,
-      resumo: DescontoResumo(
-          totalBruto: bruto,
-          totalLiquido: liquido,
-          ativos: ativos,
-          expirando: exp
-      ),
-    );
-    notifyListeners();
   }
 
-  void _updateState({bool carregando = false, String? erro}) {
-    _state = DescontoState(
-      descontos: _state.descontos,
-      carregando: carregando,
-      erro: erro,
-      filtroAtivo: _state.filtroAtivo,
-      resumo: _state.resumo,
-    );
-    notifyListeners();
+  Future<void> excluirDesconto(String id) async {
+    _setCarregando();
+    try {
+      await _service.excluir(id);
+      await carregarDescontos();
+    } catch (e) {
+      _setErro(e);
+    }
   }
+
+  void descartarErro() => _emit(_state.copyWith(limparErro: true));
 }

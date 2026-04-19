@@ -15,6 +15,7 @@ import '../../widgets/theme_toggle_button.dart';
 import '../contas_pagar/contas_pagar_screen.dart';
 import '../desconto/desconto_screen.dart';
 import '../investimento/investimento_screen.dart';
+import '../relatorios/relatorios_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -114,6 +115,7 @@ class HomeScreen extends StatelessWidget {
 
                     _buildMenuCard(context, "Fornecedor", Icons.business, Colors.brown, const FornecedorScreen(), width: itemWidth),
                     _buildMenuCard(context, "Clientes", Icons.person, Colors.teal, const ClienteScreen(), width: itemWidth),
+                    _buildMenuCard(context, "Relatório", Icons.newspaper, Colors.teal, const RelatoriosScreen(), width: itemWidth),
                   ],
                 );
               }

@@ -10,6 +10,7 @@ import 'package:finance/services/desconto_service.dart';
 import 'package:finance/services/entrada_service.dart';
 import 'package:finance/services/fornecedor_service.dart';
 import 'package:finance/services/investimento_service.dart';
+import 'package:finance/services/relatorio_service/relatorio_service.dart';
 import 'package:finance/services/saida_service.dart';
 import 'package:finance/services/usuario_service.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ import 'package:finance/screen/home/home_screen.dart';
 import 'controllers/clientes_controller.dart';
 import 'controllers/desconto_controller.dart';
 import 'controllers/entrada_controller.dart';
+import 'controllers/relatorio_controller/relatorio_controller.dart';
 import 'controllers/saida_controller.dart';
 import 'core/theme/app_theme.dart';
 
@@ -72,9 +74,13 @@ void main() async {
           create: (_) => UsuarioController(),
         ),
         ChangeNotifierProvider(
-          create: (_) => DescontoController(DescontoService()),
+          create: (_) => DescontoController(),
         ),
-        ChangeNotifierProvider(create: (_) => ThemeController()),
+        ChangeNotifierProvider(create: (_) => ThemeController(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RelatorioController(RelatorioService()),
+        ),
       ],
       child: const MyApp(),
     ),
