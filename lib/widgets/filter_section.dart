@@ -10,15 +10,16 @@ class FilterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: theme.textTheme.bodySmall?.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w600,
-            color: AppColors.textHint,
+            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
             letterSpacing: 0.6,
           ),
         ),
@@ -45,11 +46,12 @@ class FilterDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F5F7),
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border, width: 0.5),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1), width: 0.5),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
@@ -57,9 +59,9 @@ class FilterDropdown<T> extends StatelessWidget {
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           borderRadius: BorderRadius.circular(10),
-          style: const TextStyle(
+          dropdownColor: theme.cardColor,
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontSize: 14,
-            color: AppColors.textPrimary,
             fontWeight: FontWeight.w400,
           ),
           items: items
@@ -91,6 +93,7 @@ class FilterDatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
@@ -99,10 +102,10 @@ class FilterDatePicker extends StatelessWidget {
           firstDate: DateTime(2000),
           lastDate: DateTime(2100),
           builder: (ctx, child) => Theme(
-            data: Theme.of(ctx).copyWith(
-              colorScheme: const ColorScheme.light(
-                primary: AppColors.blueMid,
-                onPrimary: Colors.white,
+            data: theme.copyWith(
+              colorScheme: theme.colorScheme.copyWith(
+                primary: theme.primaryColor,
+                onPrimary: theme.colorScheme.onPrimary,
               ),
             ),
             child: child!,
@@ -113,37 +116,37 @@ class FilterDatePicker extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFF4F5F7),
+          color: theme.scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border, width: 0.5),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1), width: 0.5),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.calendar_today_outlined,
               size: 15,
-              color: AppColors.textHint,
+              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
             ),
             const SizedBox(width: 8),
             Text(
               value != null
                   ? '${value!.day.toString().padLeft(2, '0')}/${value!.month.toString().padLeft(2, '0')}/${value!.year}'
                   : hint,
-              style: TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
                 color: value != null
-                    ? AppColors.textPrimary
-                    : AppColors.textHint,
+                    ? theme.textTheme.bodyMedium?.color
+                    : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
               ),
             ),
             const Spacer(),
             if (value != null)
               GestureDetector(
                 onTap: () => onChanged(null),
-                child: const Icon(
+                child: Icon(
                   Icons.close,
                   size: 15,
-                  color: AppColors.textHint,
+                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                 ),
               ),
           ],

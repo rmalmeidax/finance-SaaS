@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/usuario_controller.dart';
+import '../../widgets/dashboard_resumo_card_widget.dart';
 import '../../model/usuario_model.dart';
 
 // ══════════════════════════════════════════════════════════════
@@ -236,7 +237,6 @@ class UsuarioScreen extends StatelessWidget {
   // ══════════════════════════════════════════════════════════
 
   Widget _buildDashboard(BuildContext context, UsuarioController c) {
-    final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isWide = constraints.maxWidth > 600;
@@ -246,17 +246,13 @@ class UsuarioScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                _dashCard(context, 'TOTAL', '${c.usuarios.length}',
-                    theme.primaryColor, Icons.people_outline),
+                Expanded(child: DashboardResumoCardWidget(title: 'TOTAL', value: '${c.usuarios.length}', color: _T.teal, icon: Icons.people_outline)),
                 const SizedBox(width: 10),
-                _dashCard(context, 'ATIVOS', '${c.totalAtivos}',
-                    _T.green, Icons.check_circle_outline),
+                Expanded(child: DashboardResumoCardWidget(title: 'ATIVOS', value: '${c.totalAtivos}', color: _T.green, icon: Icons.check_circle_outline)),
                 const SizedBox(width: 10),
-                _dashCard(context, 'ADMINS', '${c.totalAdmins}',
-                    const Color(0xFF4FC3F7), Icons.admin_panel_settings_outlined),
+                Expanded(child: DashboardResumoCardWidget(title: 'ADMINS', value: '${c.totalAdmins}', color: const Color(0xFF4FC3F7), icon: Icons.admin_panel_settings_outlined)),
                 const SizedBox(width: 10),
-                _dashCard(context, 'PENDENTES', '${c.totalPendentes}',
-                    _T.orange, Icons.hourglass_empty_outlined),
+                Expanded(child: DashboardResumoCardWidget(title: 'PENDENTES', value: '${c.totalPendentes}', color: _T.orange, icon: Icons.hourglass_empty_outlined)),
               ],
             ),
           );
@@ -267,21 +263,17 @@ class UsuarioScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _dashCard(context, 'TOTAL', '${c.usuarios.length}',
-                        theme.primaryColor, Icons.people_outline),
+                    Expanded(child: DashboardResumoCardWidget(title: 'TOTAL', value: '${c.usuarios.length}', color: _T.teal, icon: Icons.people_outline)),
                     const SizedBox(width: 10),
-                    _dashCard(context, 'ATIVOS', '${c.totalAtivos}',
-                        _T.green, Icons.check_circle_outline),
+                    Expanded(child: DashboardResumoCardWidget(title: 'ATIVOS', value: '${c.totalAtivos}', color: _T.green, icon: Icons.check_circle_outline)),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    _dashCard(context, 'ADMINS', '${c.totalAdmins}',
-                        const Color(0xFF4FC3F7), Icons.admin_panel_settings_outlined),
+                    Expanded(child: DashboardResumoCardWidget(title: 'ADMINS', value: '${c.totalAdmins}', color: const Color(0xFF4FC3F7), icon: Icons.admin_panel_settings_outlined)),
                     const SizedBox(width: 10),
-                    _dashCard(context, 'PENDENTES', '${c.totalPendentes}',
-                        _T.orange, Icons.hourglass_empty_outlined),
+                    Expanded(child: DashboardResumoCardWidget(title: 'PENDENTES', value: '${c.totalPendentes}', color: _T.orange, icon: Icons.hourglass_empty_outlined)),
                   ],
                 ),
               ],
@@ -290,47 +282,6 @@ class UsuarioScreen extends StatelessWidget {
         }
       }
     );
-  }
-
-  Widget _dashCard(BuildContext context, String titulo, String valor, Color cor, IconData icon, {bool fullWidth = false}) {
-    final theme = Theme.of(context);
-    final card = Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cor.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 13, color: cor),
-              const SizedBox(width: 5),
-              Flexible(
-                child: Text(titulo,
-                    style: TextStyle(
-                        color: cor,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.5),
-                    overflow: TextOverflow.ellipsis),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(valor,
-              style: TextStyle(
-                  color: theme.textTheme.bodyLarge?.color,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: _T.mono)),
-        ],
-      ),
-    );
-
-    return fullWidth ? SizedBox(width: double.infinity, child: card) : Expanded(child: card);
   }
 
   // ══════════════════════════════════════════════════════════
@@ -688,7 +639,6 @@ class UsuarioScreen extends StatelessWidget {
         Usuario? usuario,
       }) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final nomeCtrl =
     TextEditingController(text: usuario?.nome ?? '');
@@ -697,7 +647,7 @@ class UsuarioScreen extends StatelessWidget {
     final emailCtrl =
     TextEditingController(text: usuario?.email ?? '');
     final senhaCtrl = TextEditingController(
-        text: usuario == null ? '••••••••••••' : '••••••••••••');
+        text: '••••••••••••');
     final telefoneCtrl =
     TextEditingController(text: usuario?.telefone ?? '');
     final cargoCtrl =
@@ -1550,6 +1500,12 @@ class UsuarioScreen extends StatelessWidget {
     ));
   }
 
-  // ── Cores por perfil / status ─────────────────────────────
-  // (Removidos _perfilColor e _statusColor pois agora usamos _T)
+  IconData _perfilIcon(PerfilUsuario p) {
+    switch (p) {
+      case PerfilUsuario.administrador: return Icons.admin_panel_settings_outlined;
+      case PerfilUsuario.gerente:       return Icons.manage_accounts_outlined;
+      case PerfilUsuario.operador:      return Icons.person_outline;
+      case PerfilUsuario.visualizador:  return Icons.visibility_outlined;
+    }
+  }
 }

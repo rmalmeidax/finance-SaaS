@@ -159,6 +159,7 @@ class _LoginScreenState extends State<LoginScreen>
                           const SizedBox(height: 8),
                           CustomInputWidget(
                             controller: emailController,
+                            label: "E-mail",
                             hint: "seu@email.com",
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
@@ -170,6 +171,7 @@ class _LoginScreenState extends State<LoginScreen>
                           const SizedBox(height: 8),
                           CustomInputWidget(
                             controller: senhaController,
+                            label: "Senha",
                             hint: "••••••••",
                             icon: Icons.lock_outline,
                             obscure: true,

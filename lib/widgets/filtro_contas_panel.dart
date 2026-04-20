@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../controllers/relatorio_controller/relatorio_controller.dart';
 import '../model/relatorio_madel/filtro_contas.dart';
-import '../util/app_theme.dart';
 import 'filter_section.dart';
 import '../../widgets/toggle_pill_group.dart';
 
@@ -25,9 +24,6 @@ class FiltroContasPanel extends StatelessWidget {
             selected: f.tipoLancamento,
             labelFor: (v) => v.label,
             onChanged: (v) => context.read<RelatorioController>().setTipoLancamento(v),
-            activeColor: AppColors.blueMid,
-            activeBg: AppColors.blueLight,
-            activeText: AppColors.blueDark,
           ),
         ),
         const SizedBox(height: 16),
@@ -96,9 +92,6 @@ class FiltroContasPanel extends StatelessWidget {
             selected: f.agrupamento,
             labelFor: (v) => v.label,
             onChanged: (v) => context.read<RelatorioController>().setAgrupamentoConta(v),
-            activeColor: AppColors.blueMid,
-            activeBg: AppColors.blueLight,
-            activeText: AppColors.blueDark,
           ),
         ),
       ],

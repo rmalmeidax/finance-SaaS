@@ -100,4 +100,23 @@ class AuthService extends ChangeNotifier {
   Future<void> logout() async {
     await _auth.signOut();
   }
+
+  // 🔑 PASSWORD RECOVERY
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // 📱 PHONE AUTH (Note: This is more complex and usually requires a full verification flow)
+  // For now, we'll implement a stub or a placeholder if the project uses a specific SMS provider.
+  // Standard Firebase Phone Auth requires a verification ID and SMS code.
+  Future<void> sendPasswordResetSms(String phone) async {
+    // Placeholder for custom backend logic or Firebase Phone Auth
+    // Firebase doesn't have a direct "reset password via SMS" like email.
+    // Usually, you'd use Phone Auth to sign in and then let them change the password.
+    throw UnimplementedError("Recuperação por SMS requer integração com Firebase Phone Auth ou Gateway de SMS.");
+  }
 }

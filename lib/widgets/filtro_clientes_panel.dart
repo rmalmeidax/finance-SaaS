@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../controllers/relatorio_controller/relatorio_controller.dart';
 import '../model/relatorio_madel/filtro_clientes.dart';
-import '../util/app_theme.dart';
 import 'filter_section.dart';
 import '../../widgets/toggle_pill_group.dart';
 
@@ -25,9 +24,6 @@ class FiltroClientesPanel extends StatelessWidget {
             selected: f.tipoEntidade,
             labelFor: (v) => v.label,
             onChanged: (v) => context.read<RelatorioController>().setTipoEntidade(v),
-            activeColor: AppColors.tealMid,
-            activeBg: AppColors.tealLight,
-            activeText: AppColors.tealDark,
           ),
         ),
         const SizedBox(height: 16),
@@ -95,9 +91,6 @@ class FiltroClientesPanel extends StatelessWidget {
             options: FiltroClientes.opcoesInformacoes,
             selected: f.informacoesIncluidas,
             onToggle: (v) => context.read<RelatorioController>().toggleInfoClientes(v),
-            activeColor: AppColors.tealMid,
-            activeBg: AppColors.tealLight,
-            activeText: AppColors.tealDark,
           ),
         ),
       ],

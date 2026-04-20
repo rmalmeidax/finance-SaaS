@@ -20,11 +20,13 @@ class FiltroPanel extends StatelessWidget {
 
     if (tipo == null) return const SizedBox.shrink();
 
+    final theme = Theme.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 0.5),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,9 +34,9 @@ class FiltroPanel extends StatelessWidget {
           // ── Header ─────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: AppColors.border, width: 0.5),
+                bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1), width: 0.5),
               ),
             ),
             child: Column(
@@ -42,18 +44,17 @@ class FiltroPanel extends StatelessWidget {
               children: [
                 Text(
                   'Filtros — ${tipo.label}',
-                  style: const TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   tipo.descricao,
-                  style: const TextStyle(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -69,9 +70,9 @@ class FiltroPanel extends StatelessWidget {
           // ── Barra de ações ──────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: AppColors.border, width: 0.5),
+                top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1), width: 0.5),
               ),
             ),
             child: Row(

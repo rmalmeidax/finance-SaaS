@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../controllers/relatorio_controller/relatorio_controller.dart';
 import '../model/relatorio_madel/filtro_usuarios.dart';
-import '../util/app_theme.dart';
 import 'filter_section.dart';
 import '../../widgets/toggle_pill_group.dart';
 
@@ -83,9 +82,6 @@ class FiltroUsuariosPanel extends StatelessWidget {
             selected: f.tipoAcao,
             labelFor: (v) => v.label,
             onChanged: (v) => context.read<RelatorioController>().setTipoAcao(v),
-            activeColor: AppColors.purpleMid,
-            activeBg: AppColors.purpleLight,
-            activeText: AppColors.purpleDark,
           ),
         ),
       ],

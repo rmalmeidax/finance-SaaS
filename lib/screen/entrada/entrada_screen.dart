@@ -4,31 +4,55 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/entrada_controller.dart';
 import '../../model/entrada_model.dart';
+import '../../widgets/custom_input_widget.dart';
+import '../../widgets/dashboard_resumo_card_widget.dart';
+
+// ══════════════════════════════════════════════════════════════
+// DESIGN TOKENS
+// ══════════════════════════════════════════════════════════════
+abstract class _T {
+  static const teal   = Color(0xFF00BFA5);
+  static const green  = Color(0xFF43A047);
+  static const orange = Color(0xFFEF6C00);
+  static const blue   = Color(0xFF1565C0);
+  static const red    = Color(0xFFC62828);
+  static const mono   = 'monospace';
+
+  static String fmtMoeda(double v) {
+    final n = v.toStringAsFixed(2)
+        .replaceAll('.', ',')
+        .replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?=,))'),
+          (m) => '${m[1]}.',
+    );
+    return 'R\$ $n';
+  }
+
+  static String fmtData(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+}
 
 class EntradaScreen extends StatelessWidget {
   const EntradaScreen({super.key});
 
-  String formatar(double valor) =>
-      valor.toStringAsFixed(2).replaceAll('.', ',');
-
   double parseValor(String texto) =>
-      double.tryParse(texto.replaceAll(',', '.')) ?? 0;
-
-  String _formatData(DateTime d) =>
-      "${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}";
+      double.tryParse(texto.replaceAll('.', '').replaceAll(',', '.')) ?? 0;
 
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<EntradaController>(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new,
-              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6), size: 18),
+              color: theme.primaryColor, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -37,15 +61,14 @@ class EntradaScreen extends StatelessWidget {
               width: 3,
               height: 22,
               decoration: const BoxDecoration(
-                color: Color(0xFF00BFA5),
+                color: _T.teal,
                 borderRadius: BorderRadius.all(Radius.circular(2)),
               ),
             ),
             const SizedBox(width: 10),
             Text(
               "ENTRADAS",
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 3,
@@ -54,10 +77,9 @@ class EntradaScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          // Filtro período customizado
           IconButton(
             icon: Icon(Icons.date_range_outlined,
-                color: Theme.of(context).primaryColor, size: 20),
+                color: theme.primaryColor, size: 20),
             tooltip: "Filtrar por período",
             onPressed: () async {
               final range = await showDateRangePicker(
@@ -66,11 +88,11 @@ class EntradaScreen extends StatelessWidget {
                 lastDate: DateTime(2100),
                 initialDateRange: controller.periodoCustom,
                 builder: (ctx, child) => Theme(
-                  data: Theme.of(context).copyWith(
+                  data: theme.copyWith(
                     colorScheme: ColorScheme.fromSeed(
-                      seedColor: Theme.of(context).primaryColor,
-                      brightness: Theme.of(context).brightness,
-                      primary: Theme.of(context).primaryColor,
+                      seedColor: theme.primaryColor,
+                      brightness: theme.brightness,
+                      primary: theme.primaryColor,
                     ),
                   ),
                   child: child!,
@@ -82,13 +104,13 @@ class EntradaScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: theme.primaryColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
               iconSize: 18,
-              icon: Icon(Icons.add, color: Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white),
+              icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
               onPressed: () => _showDialog(context, controller),
             ),
           ),
@@ -101,18 +123,25 @@ class EntradaScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Theme.of(context).dividerColor),
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: theme.dividerColor),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: TextField(
-                style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 14),
+                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: "Buscar por descrição ou cliente...",
                   hintStyle: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3), fontSize: 14),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3), fontSize: 14),
                   prefixIcon: Icon(Icons.search,
-                      color: Theme.of(context).primaryColor, size: 18),
+                      color: theme.primaryColor, size: 18),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -124,7 +153,7 @@ class EntradaScreen extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ── DASHBOARD ──
-          _dashboard(controller),
+          _dashboard(context, controller),
 
           const SizedBox(height: 16),
 
@@ -134,18 +163,18 @@ class EntradaScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                _periodoChip("Hoje", FiltroPeriodo.hoje, controller),
+                _periodoChip(context, "Hoje", FiltroPeriodo.hoje, controller),
                 const SizedBox(width: 8),
-                _periodoChip("Semana", FiltroPeriodo.semana, controller),
+                _periodoChip(context, "Semana", FiltroPeriodo.semana, controller),
                 const SizedBox(width: 8),
-                _periodoChip("Mês", FiltroPeriodo.mes, controller),
+                _periodoChip(context, "Mês", FiltroPeriodo.mes, controller),
                 const SizedBox(width: 8),
-                _periodoChip("Trimestre", FiltroPeriodo.trimestre, controller),
+                _periodoChip(context, "Trimestre", FiltroPeriodo.trimestre, controller),
                 const SizedBox(width: 8),
-                _periodoChip("Todos", FiltroPeriodo.todos, controller),
+                _periodoChip(context, "Todos", FiltroPeriodo.todos, controller),
                 if (controller.periodoCustom != null) ...[
                   const SizedBox(width: 8),
-                  _customPeriodoChip(controller),
+                  _customPeriodoChip(context, controller),
                 ],
               ],
             ),
@@ -159,11 +188,11 @@ class EntradaScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                _categoriaChip(null, "Todas", controller),
+                _categoriaChip(context, null, "Todas", controller),
                 ...CategoriaEntrada.values.map((cat) {
                   return Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: _categoriaChip(cat, cat.label, controller),
+                    child: _categoriaChip(context, cat, cat.label, controller),
                   );
                 }),
               ],
@@ -205,66 +234,73 @@ class EntradaScreen extends StatelessWidget {
   }
 
   // ── DASHBOARD ──
-  Widget _dashboard(EntradaController controller) {
+  Widget _dashboard(BuildContext context, EntradaController controller) {
     final hoje = DateTime.now();
     final totalMes = controller.entradas
         .where((e) =>
     e.data.year == hoje.year && e.data.month == hoje.month)
         .fold(0.0, (s, e) => s + e.valor);
 
-    final maiorCategoria = CategoriaEntrada.values.reduce((a, b) =>
-    controller.totalPorCategoria(a) >= controller.totalPorCategoria(b)
-        ? a
-        : b);
+    final maiorCategoria = controller.entradas.isEmpty 
+        ? CategoriaEntrada.outros 
+        : CategoriaEntrada.values.reduce((a, b) =>
+            controller.totalPorCategoria(a) >= controller.totalPorCategoria(b) ? a : b);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isSmall = constraints.maxWidth < 500;
+        final isMobile = constraints.maxWidth < 600;
+
+        final cards = [
+          Expanded(
+            flex: isMobile ? 1 : 2,
+            child: DashboardResumoCardWidget(
+              title: "TOTAL FILTRADO",
+              value: _T.fmtMoeda(controller.totalEntradas),
+              color: _T.teal,
+              icon: Icons.account_balance_wallet_outlined,
+              isWide: !isMobile,
+            ),
+          ),
+          Expanded(
+            child: DashboardResumoCardWidget(
+              title: "ESTE MÊS",
+              value: _T.fmtMoeda(totalMes),
+              color: const Color(0xFF4FC3F7),
+              icon: Icons.calendar_month_outlined,
+            ),
+          ),
+          Expanded(
+            child: DashboardResumoCardWidget(
+              title: "TOP CATEG.",
+              value: "${maiorCategoria.icon} ${maiorCategoria.label}",
+              color: const Color(0xFFFFB74D),
+              icon: Icons.star_outline,
+            ),
+          ),
+        ];
+
+        if (isMobile) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                Row(children: [cards[0]]),
+                const SizedBox(height: 10),
+                Row(children: [cards[1], const SizedBox(width: 10), cards[2]]),
+              ],
+            ),
+          );
+        }
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
+          child: Row(
             children: [
-              Row(
-                children: [
-                  _dashCard(
-                    "TOTAL FILTRADO",
-                    "R\$ ${formatar(controller.totalEntradas)}",
-                    Theme.of(context).primaryColor,
-                    Icons.account_balance_wallet_outlined,
-                    wide: true,
-                  ),
-                  if (!isSmall) ...[
-                    const SizedBox(width: 10),
-                    _dashCard(
-                      "ESTE MÊS",
-                      "R\$ ${formatar(totalMes)}",
-                      const Color(0xFF4FC3F7),
-                      Icons.calendar_month_outlined,
-                    ),
-                  ],
-                ],
-              ),
-              if (isSmall) const SizedBox(height: 10),
-              Row(
-                children: [
-                  if (isSmall) ...[
-                    _dashCard(
-                      "ESTE MÊS",
-                      "R\$ ${formatar(totalMes)}",
-                      const Color(0xFF4FC3F7),
-                      Icons.calendar_month_outlined,
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  _dashCard(
-                    "TOP CATEG.",
-                    "${maiorCategoria.icon} ${maiorCategoria.label}",
-                    const Color(0xFFFFB74D),
-                    Icons.star_outline,
-                    wide: isSmall,
-                  ),
-                ],
-              ),
+              cards[0],
+              const SizedBox(width: 10),
+              cards[1],
+              const SizedBox(width: 10),
+              cards[2],
             ],
           ),
         );
@@ -272,91 +308,37 @@ class EntradaScreen extends StatelessWidget {
     );
   }
 
-  Widget _dashCard(String titulo, String valor, Color cor, IconData icon,
-      {bool wide = false}) {
-    return Expanded(
-      flex: wide ? 2 : 1,
-      child: Builder(
-        builder: (context) {
-          final theme = Theme.of(context);
-          return Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cor.withValues(alpha: 0.25)),
-              boxShadow: [
-                BoxShadow(
-                  color: cor.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(icon, size: 13, color: cor),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: Text(titulo,
-                          style: TextStyle(
-                              color: cor,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.5),
-                          overflow: TextOverflow.ellipsis),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "R\$",
-                  style: TextStyle(color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4), fontSize: 10),
-                ),
-                Text(valor.replaceFirst("R\$ ", ""),
-                    style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color,
-                        fontSize: wide ? 18 : 15,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.w800),
-                    overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          );
-        }
-      ),
-    );
-  }
+  // Card local removido em favor do widget global DashboardResumoCardWidget
+
 
   // ── CARD ──
   Widget _entradaCard(
       BuildContext context, Entrada e, EntradaController controller) {
     final cor = _corCategoria(e.categoria);
+    final theme = Theme.of(context);
+    final isRecebido = e.status == 'Recebido';
+    final statusColor = isRecebido ? _T.green : _T.orange;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         children: [
           // Header
           Container(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: cor.withValues(alpha: 0.06),
+              color: cor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
-              border:
-              Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+              border: Border(
+                  bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1))),
             ),
             child: Row(
               children: [
@@ -365,7 +347,7 @@ class EntradaScreen extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: cor.withValues(alpha: 0.12),
+                    color: cor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -380,8 +362,7 @@ class EntradaScreen extends StatelessWidget {
                     children: [
                       Text(
                         e.descricao.toUpperCase(),
-                        style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                             letterSpacing: 0.5),
@@ -389,24 +370,24 @@ class EntradaScreen extends StatelessWidget {
                       ),
                       if (e.cliente.isNotEmpty)
                         Text(e.cliente,
-                            style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
                                 fontSize: 11)),
                     ],
                   ),
                 ),
-                // Badge categoria
+                // Badge status
                 Container(
                   padding:
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: cor.withValues(alpha: 0.12),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: cor.withValues(alpha: 0.3)),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                   ),
-                  child: Text(e.categoria.label,
+                  child: Text(e.status.toUpperCase(),
                       style: TextStyle(
-                          color: cor,
+                          color: statusColor,
                           fontSize: 10,
                           fontWeight: FontWeight.w700)),
                 ),
@@ -421,11 +402,12 @@ class EntradaScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _infoItem(Icons.calendar_today_outlined, "Data",
-                        _formatData(e.data)),
-                    _infoItem(Icons.person_outline, "Cliente",
+                    _infoItem(context, Icons.calendar_today_outlined, "Data",
+                        _T.fmtData(e.data)),
+                    _infoItem(context, Icons.person_outline, "Cliente",
                         e.cliente.isEmpty ? '—' : e.cliente),
-                    _infoItem(Icons.info_outline, "Status", e.status),
+                    _infoItem(context, Icons.category_outlined, "Categoria",
+                        e.categoria.label),
                   ],
                 ),
                 if (e.observacao.isNotEmpty) ...[
@@ -435,19 +417,19 @@ class EntradaScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: theme.scaffoldBackgroundColor.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
                         Icon(Icons.notes_outlined,
                             size: 13,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35)),
+                            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4)),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(e.observacao,
-                              style: TextStyle(
-                                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                                   fontSize: 12)),
                         ),
                       ],
@@ -462,16 +444,16 @@ class EntradaScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("VALOR",
-                            style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
+                            style: theme.textTheme.bodySmall?.copyWith(
                                 fontSize: 9,
+                                fontWeight: FontWeight.w700,
                                 letterSpacing: 1.5)),
                         Text(
-                          "R\$ ${formatar(e.valor)}",
-                          style: const TextStyle(
-                              color: Color(0xFF66BB6A),
+                          _T.fmtMoeda(e.valor),
+                          style: TextStyle(
+                              color: isRecebido ? _T.green : _T.orange,
                               fontSize: 22,
-                              fontFamily: 'monospace',
+                              fontFamily: _T.mono,
                               fontWeight: FontWeight.w800),
                         ),
                       ],
@@ -481,8 +463,7 @@ class EntradaScreen extends StatelessWidget {
                         _actionButton(
                           icon: Icons.edit_outlined,
                           tooltip: "Editar",
-                          color: const Color(0xFF4FC3F7).withValues(alpha: 0.1),
-                          iconColor: const Color(0xFF4FC3F7),
+                          iconColor: _T.blue,
                           onTap: () =>
                               _showDialog(context, controller, entrada: e),
                         ),
@@ -490,8 +471,7 @@ class EntradaScreen extends StatelessWidget {
                         _actionButton(
                           icon: Icons.delete_outline,
                           tooltip: "Excluir",
-                          color: Colors.red.withValues(alpha: 0.1),
-                          iconColor: Colors.red.withValues(alpha: 0.6),
+                          iconColor: _T.red,
                           onTap: () =>
                               _confirmDelete(context, e, controller),
                         ),
@@ -510,49 +490,52 @@ class EntradaScreen extends StatelessWidget {
   Color _corCategoria(CategoriaEntrada cat) {
     switch (cat) {
       case CategoriaEntrada.salario:
-        return const Color(0xFF66BB6A);
+        return _T.green;
       case CategoriaEntrada.vendas:
-        return const Color(0xFF4FC3F7);
+        return _T.blue;
       case CategoriaEntrada.servicos:
-        return const Color(0xFFFFB74D);
+        return _T.orange;
       case CategoriaEntrada.alugueis:
         return const Color(0xFFB39DDB);
       case CategoriaEntrada.investimentos:
-        return const Color(0xFF26A69A);
+        return _T.teal;
       case CategoriaEntrada.outros:
         return const Color(0xFF90A4AE);
     }
   }
 
-  Widget _infoItem(IconData icon, String label, String value) {
+  Widget _infoItem(BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
+    final isMonospace = label.toLowerCase().contains("data") || 
+                        label.toLowerCase().contains("valor") ||
+                        label.toLowerCase().contains("id") ||
+                        label.toLowerCase().contains("código");
+
     return Expanded(
-      child: Builder(
-        builder: (context) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Icon(icon, size: 11, color: Theme.of(context).primaryColor),
-                  const SizedBox(width: 4),
-                  Text(label,
-                      style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
-                          fontSize: 9,
-                          letterSpacing: 1)),
-                ],
-              ),
-              const SizedBox(height: 3),
-              Text(value,
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyMedium?.color, 
-                    fontSize: 12,
-                    fontFamily: (label == "Data") ? 'monospace' : null,
-                  ),
-                  overflow: TextOverflow.ellipsis),
+              Icon(icon, size: 11, color: theme.primaryColor),
+              const SizedBox(width: 4),
+              Text(label.toUpperCase(),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1)),
             ],
-          );
-        }
+          ),
+          const SizedBox(height: 3),
+          Text(value,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                fontFamily: isMonospace ? _T.mono : null,
+              ),
+              overflow: TextOverflow.ellipsis),
+        ],
       ),
     );
   }
@@ -560,7 +543,6 @@ class EntradaScreen extends StatelessWidget {
   Widget _actionButton({
     required IconData icon,
     required String tooltip,
-    required Color color,
     required Color iconColor,
     required VoidCallback onTap,
   }) {
@@ -573,7 +555,7 @@ class EntradaScreen extends StatelessWidget {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: color,
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: iconColor.withValues(alpha: 0.2)),
           ),
@@ -585,66 +567,57 @@ class EntradaScreen extends StatelessWidget {
 
   // ── CHIPS ──
   Widget _periodoChip(
-      String label, FiltroPeriodo periodo, EntradaController c) {
-    return Builder(
-      builder: (context) {
-        final selected =
-            c.filtroPeriodo == periodo && c.periodoCustom == null;
-        return GestureDetector(
-          onTap: () => c.setFiltroPeriodo(periodo),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-            decoration: BoxDecoration(
+      BuildContext context, String label, FiltroPeriodo periodo, EntradaController c) {
+    final selected = c.filtroPeriodo == periodo && c.periodoCustom == null;
+    final primaryColor = Theme.of(context).primaryColor;
+    return GestureDetector(
+      onTap: () => c.setFiltroPeriodo(periodo),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected ? primaryColor : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
               color: selected
-                  ? Theme.of(context).primaryColor
-                  : Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                  color: selected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).dividerColor),
-            ),
-            child: Text(label,
-                style: TextStyle(
-                    color: selected ? (Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
-                    fontSize: 11,
-                    fontWeight:
-                    selected ? FontWeight.w700 : FontWeight.w400)),
-          ),
-        );
-      }
+                  ? primaryColor
+                  : Theme.of(context).dividerColor),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                color: selected ? (primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                fontSize: 11,
+                fontWeight:
+                selected ? FontWeight.w700 : FontWeight.w400)),
+      ),
     );
   }
 
-  Widget _customPeriodoChip(EntradaController c) {
+  Widget _customPeriodoChip(BuildContext context, EntradaController c) {
     final r = c.periodoCustom!;
-    final label =
-        "${_formatData(r.start)} → ${_formatData(r.end)}";
     return GestureDetector(
       onTap: () => c.setFiltroPeriodo(FiltroPeriodo.mes),
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFB74D).withValues(alpha: 0.15),
+          color: _T.orange.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFFFB74D).withValues(alpha: 0.4)),
+          border: Border.all(color: _T.orange.withValues(alpha: 0.2)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.date_range,
-                size: 12, color: Color(0xFFFFB74D)),
+                size: 12, color: _T.orange),
             const SizedBox(width: 6),
-            Text(label,
+            Text("${_T.fmtData(r.start)} → ${_T.fmtData(r.end)}",
                 style: const TextStyle(
-                    color: Color(0xFFFFB74D),
+                    color: _T.orange,
                     fontSize: 11,
-                    fontFamily: 'monospace',
+                    fontFamily: _T.mono,
                     fontWeight: FontWeight.w600)),
             const SizedBox(width: 6),
-            const Icon(Icons.close, size: 12, color: Color(0xFFFFB74D)),
+            const Icon(Icons.close, size: 12, color: _T.orange),
           ],
         ),
       ),
@@ -652,40 +625,37 @@ class EntradaScreen extends StatelessWidget {
   }
 
   Widget _categoriaChip(
-      CategoriaEntrada? cat, String label, EntradaController c) {
-    return Builder(
-      builder: (context) {
-        final selected = c.filtroCategoria == cat;
-        final cor = cat != null ? _corCategoria(cat) : Theme.of(context).primaryColor;
-        return GestureDetector(
-          onTap: () => c.setFiltroCategoria(cat),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: selected ? cor : Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                  color: selected ? cor : Theme.of(context).dividerColor),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (cat != null) ...[
-                  Text(cat.icon, style: const TextStyle(fontSize: 12)),
-                  const SizedBox(width: 5),
-                ],
-                Text(label,
-                    style: TextStyle(
-                        color: selected ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
-                        fontSize: 11,
-                        fontWeight:
-                        selected ? FontWeight.w700 : FontWeight.w400)),
-              ],
-            ),
-          ),
-        );
-      }
+      BuildContext context, CategoriaEntrada? cat, String label, EntradaController c) {
+    final selected = c.filtroCategoria == cat;
+    final primaryColor = Theme.of(context).primaryColor;
+    final cor = cat != null ? _corCategoria(cat) : primaryColor;
+    return GestureDetector(
+      onTap: () => c.setFiltroCategoria(cat),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected ? cor : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+              color: selected ? cor : Theme.of(context).dividerColor),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (cat != null) ...[
+              Text(cat.icon, style: const TextStyle(fontSize: 12)),
+              const SizedBox(width: 5),
+            ],
+            Text(label,
+                style: TextStyle(
+                    color: selected ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white) : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                    fontSize: 11,
+                    fontWeight:
+                    selected ? FontWeight.w700 : FontWeight.w400)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -696,7 +666,7 @@ class EntradaScreen extends StatelessWidget {
       context: context,
       barrierColor: Colors.black87,
       builder: (_) => Dialog(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16)),
         child: Padding(
@@ -705,7 +675,7 @@ class EntradaScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.warning_amber_rounded,
-                  color: Color(0xFFE53935), size: 40),
+                  color: _T.red, size: 40),
               const SizedBox(height: 12),
               Text("Excluir Entrada",
                   style: TextStyle(
@@ -728,7 +698,7 @@ class EntradaScreen extends StatelessWidget {
                         padding:
                         const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                               color: Theme.of(context).dividerColor),
@@ -736,7 +706,7 @@ class EntradaScreen extends StatelessWidget {
                         child: Text("CANCELAR",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1)),
@@ -754,13 +724,13 @@ class EntradaScreen extends StatelessWidget {
                         padding:
                         const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE53935),
+                          color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Text("EXCLUIR",
+                        child: Text("EXCLUIR",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1)),
@@ -779,6 +749,7 @@ class EntradaScreen extends StatelessWidget {
   // ── DIALOG ──
   void _showDialog(BuildContext context, EntradaController controller,
       {Entrada? entrada}) {
+    final theme = Theme.of(context);
     final descricaoCtrl =
     TextEditingController(text: entrada?.descricao ?? '');
     final clienteCtrl =
@@ -804,9 +775,9 @@ class EntradaScreen extends StatelessWidget {
         child: StatefulBuilder(builder: (context, setState) {
           return Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: theme.dialogBackgroundColor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Theme.of(context).dividerColor),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -817,23 +788,22 @@ class EntradaScreen extends StatelessWidget {
                       horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
                     border: Border(
-                        bottom: BorderSide(color: Theme.of(context).dividerColor)),
+                        bottom: BorderSide(color: theme.dividerColor)),
                   ),
                   child: Row(
                     children: [
                       Container(
                         width: 3,
-                        height: 18,
+                        height: 22,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
+                          color: _T.teal,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Text(
                         entrada == null ? "NOVA ENTRADA" : "EDITAR ENTRADA",
-                        style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                        style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             letterSpacing: 3,
                             fontSize: 14),
@@ -842,7 +812,7 @@ class EntradaScreen extends StatelessWidget {
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Icon(Icons.close,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
+                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
                       ),
                     ],
                   ),
@@ -855,23 +825,29 @@ class EntradaScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _labelSection("INFORMAÇÕES"),
+                        _labelSection(context, "INFORMAÇÕES"),
                         const SizedBox(height: 10),
-                        _inputField(descricaoCtrl, "Descrição",
-                            Icons.description_outlined),
+                        CustomInputWidget(
+                          controller: descricaoCtrl,
+                          label: "Descrição",
+                          icon: Icons.description_outlined,
+                        ),
                         const SizedBox(height: 10),
-                        _inputField(clienteCtrl, "Cliente / Origem",
-                            Icons.person_outline),
+                        CustomInputWidget(
+                          controller: clienteCtrl,
+                          label: "Cliente / Origem",
+                          icon: Icons.person_outline,
+                        ),
                         const SizedBox(height: 10),
-                        _inputField(
-                          valorCtrl,
-                          "Valor (ex: 1.500,00)",
-                          Icons.attach_money,
+                        CustomInputWidget(
+                          controller: valorCtrl,
+                          label: "Valor (ex: 1.500,00)",
+                          icon: Icons.attach_money,
                           keyboardType: TextInputType.number,
                         ),
 
                         const SizedBox(height: 20),
-                        _labelSection("CATEGORIA"),
+                        _labelSection(context, "CATEGORIA"),
                         const SizedBox(height: 10),
                         Wrap(
                           spacing: 8,
@@ -888,13 +864,13 @@ class EntradaScreen extends StatelessWidget {
                                     horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: selected
-                                      ? cor
-                                      : Theme.of(context).scaffoldBackgroundColor,
+                                      ? cor.withValues(alpha: 0.2)
+                                      : theme.scaffoldBackgroundColor,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                       color: selected
                                           ? cor
-                                          : Theme.of(context).dividerColor),
+                                          : theme.dividerColor),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -906,8 +882,8 @@ class EntradaScreen extends StatelessWidget {
                                     Text(cat.label,
                                         style: TextStyle(
                                             color: selected
-                                                ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                                                : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                                                ? cor
+                                                : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
                                             fontSize: 12,
                                             fontWeight: selected
                                                 ? FontWeight.w700
@@ -920,7 +896,7 @@ class EntradaScreen extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 20),
-                        _labelSection("DATA E STATUS"),
+                        _labelSection(context, "DATA E STATUS"),
                         const SizedBox(height: 10),
                         Row(
                           children: [
@@ -934,11 +910,11 @@ class EntradaScreen extends StatelessWidget {
                                     firstDate: DateTime(2000),
                                     lastDate: DateTime(2100),
                                     builder: (ctx, child) => Theme(
-                                      data: Theme.of(context).copyWith(
+                                      data: theme.copyWith(
                                         colorScheme: ColorScheme.fromSeed(
-                                          seedColor: Theme.of(context).primaryColor,
-                                          brightness: Theme.of(context).brightness,
-                                          primary: Theme.of(context).primaryColor,
+                                          seedColor: theme.primaryColor,
+                                          brightness: theme.brightness,
+                                          primary: theme.primaryColor,
                                         ),
                                       ),
                                       child: child!,
@@ -951,18 +927,18 @@ class EntradaScreen extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 14),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).scaffoldBackgroundColor,
+                                    color: theme.scaffoldBackgroundColor,
                                     borderRadius:
                                     BorderRadius.circular(10),
                                     border: Border.all(
-                                        color: Theme.of(context).dividerColor),
+                                        color: theme.dividerColor),
                                   ),
                                   child: Row(
                                     children: [
                                       Icon(
                                           Icons.calendar_today_outlined,
                                           size: 16,
-                                          color: Theme.of(context).primaryColor),
+                                          color: theme.primaryColor),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Column(
@@ -971,14 +947,14 @@ class EntradaScreen extends StatelessWidget {
                                           children: [
                                             Text("Data",
                                                 style: TextStyle(
-                                                    color: Theme.of(context).textTheme.bodyMedium?.color
+                                                    color: theme.textTheme.bodyMedium?.color
                                                         ?.withValues(alpha: 0.35),
                                                     fontSize: 10)),
-                                            Text(_formatData(data),
+                                            Text(_T.fmtData(data),
                                                 style: TextStyle(
-                                                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                                                    color: theme.textTheme.bodyMedium?.color,
                                                     fontSize: 13,
-                                                    fontFamily: 'monospace')),
+                                                    fontFamily: _T.mono)),
                                           ],
                                         ),
                                       ),
@@ -996,7 +972,7 @@ class EntradaScreen extends StatelessWidget {
                                 children: [
                                   Text("Status",
                                       style: TextStyle(
-                                          color: Theme.of(context).textTheme.bodyMedium?.color
+                                          color: theme.textTheme.bodyMedium?.color
                                               ?.withValues(alpha: 0.35),
                                           fontSize: 10)),
                                   const SizedBox(height: 6),
@@ -1005,8 +981,8 @@ class EntradaScreen extends StatelessWidget {
                                         .map((s) {
                                       final sel = status == s;
                                       final cor = s == 'Recebido'
-                                          ? const Color(0xFF66BB6A)
-                                          : const Color(0xFFFFB74D);
+                                          ? _T.green
+                                          : _T.orange;
                                       return Expanded(
                                         child: GestureDetector(
                                           onTap: () =>
@@ -1022,20 +998,20 @@ class EntradaScreen extends StatelessWidget {
                                             decoration: BoxDecoration(
                                               color: sel
                                                   ? cor
-                                                  : Theme.of(context).scaffoldBackgroundColor,
+                                                  : theme.scaffoldBackgroundColor,
                                               borderRadius:
                                               BorderRadius.circular(8),
                                               border: Border.all(
                                                   color: sel
                                                       ? cor
-                                                      : Theme.of(context).dividerColor),
+                                                      : theme.dividerColor),
                                             ),
                                             child: Text(s,
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     color: sel
                                                         ? (cor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                                                        : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                                                        : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
                                                     fontSize: 11,
                                                     fontWeight: sel
                                                         ? FontWeight.w700
@@ -1052,8 +1028,11 @@ class EntradaScreen extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 10),
-                        _inputField(obsCtrl, "Observação (opcional)",
-                            Icons.notes_outlined),
+                        CustomInputWidget(
+                          controller: obsCtrl,
+                          label: "Observação (opcional)",
+                          icon: Icons.notes_outlined,
+                        ),
                       ],
                     ),
                   ),
@@ -1064,7 +1043,7 @@ class EntradaScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     border: Border(
-                        top: BorderSide(color: Theme.of(context).dividerColor)),
+                        top: BorderSide(color: theme.dividerColor)),
                   ),
                   child: Row(
                     children: [
@@ -1075,15 +1054,15 @@ class EntradaScreen extends StatelessWidget {
                             padding:
                             const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).scaffoldBackgroundColor,
+                              color: theme.dividerColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                  color: Theme.of(context).dividerColor),
+                                  color: theme.dividerColor),
                             ),
                             child: Text("CANCELAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+                                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 1.5)),
@@ -1119,7 +1098,7 @@ class EntradaScreen extends StatelessWidget {
                             padding:
                             const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
+                              color: theme.primaryColor,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -1128,7 +1107,7 @@ class EntradaScreen extends StatelessWidget {
                                   : "ATUALIZAR",
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                  color: Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5),
@@ -1147,68 +1126,26 @@ class EntradaScreen extends StatelessWidget {
     );
   }
 
-  Widget _labelSection(String label) {
-    return Builder(
-      builder: (context) {
-        return Row(
-          children: [
-            Container(
-              width: 3,
-              height: 16,
-              decoration: BoxDecoration(
-                color: const Color(0xFF00BFA5),
-                borderRadius: BorderRadius.circular(1),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(label,
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5)),
-          ],
-        );
-      }
-    );
-  }
-
-  Widget _inputField(
-      TextEditingController ctrl,
-      String label,
-      IconData icon, {
-        TextInputType keyboardType = TextInputType.text,
-      }) {
-    return Builder(
-      builder: (context) {
-        final isMonospace = label.contains("Valor") || label.contains("Nº Documento");
-        return Container(
+  Widget _labelSection(BuildContext context, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 16,
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Theme.of(context).dividerColor),
+            color: _T.teal,
+            borderRadius: BorderRadius.circular(1),
           ),
-          child: TextField(
-            controller: ctrl,
-            keyboardType: keyboardType,
+        ),
+        const SizedBox(width: 8),
+        Text(label.toUpperCase(),
             style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color, 
-              fontSize: 14,
-              fontFamily: isMonospace ? 'monospace' : null,
-            ),
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: TextStyle(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35), fontSize: 12),
-              prefixIcon:
-              Icon(icon, size: 16, color: Theme.of(context).primaryColor),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14, horizontal: 12),
-            ),
-          ),
-        );
-      }
+                color: Theme.of(context).primaryColor,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5)),
+      ],
     );
   }
+}
 }

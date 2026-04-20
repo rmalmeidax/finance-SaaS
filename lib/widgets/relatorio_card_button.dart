@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../model/relatorio_madel/relatorio_tipo.dart';
-import '../util/app_theme.dart';
 
+// ══════════════════════════════════════════════════════════════
+// DESIGN TOKENS
+// ══════════════════════════════════════════════════════════════
+abstract class _T {
+  static const teal   = Color(0xFF00BFA5);
+  static const green  = Color(0xFF43A047);
+  static const orange = Color(0xFFEF6C00);
+  static const blue   = Color(0xFF1565C0);
+  static const red    = Color(0xFFC62828);
+  static const mono   = 'monospace';
+}
 
 class RelatorioCardButton extends StatelessWidget {
   final TipoRelatorio tipo;
@@ -18,36 +28,31 @@ class RelatorioCardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final config = _configForTipo(tipo);
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? config.bgSelected : AppColors.surface,
+          color: isSelected ? config.accent.withValues(alpha: 0.1) : theme.cardColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? config.accent : AppColors.border,
-            width: isSelected ? 2 : 0.5,
+            color: isSelected ? config.accent : theme.dividerColor.withValues(alpha: 0.1),
+            width: isSelected ? 1.5 : 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: config.accent.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [
-                  const BoxShadow(
-                    color: Color(0x08000000),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
+          boxShadow: [
+            BoxShadow(
+              color: isSelected 
+                  ? config.accent.withValues(alpha: 0.08) 
+                  : Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,53 +60,41 @@ class RelatorioCardButton extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
-                    color: config.iconBg,
+                    color: config.accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(config.icon, color: config.iconColor, size: 18),
+                  child: Icon(config.icon, color: config.accent, size: 16),
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: config.badgeBg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    tipo.categoria,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: config.badgeText,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ),
+                if (isSelected)
+                  Icon(Icons.check_circle_rounded, color: config.accent, size: 16),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               tipo.label,
-              style: const TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-                height: 1.3,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected ? config.accent : null,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-            Text(
-              tipo.descricao,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textSecondary,
-                height: 1.4,
+            Expanded(
+              child: Text(
+                tipo.descricao,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 10,
+                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -115,42 +108,22 @@ class RelatorioCardButton extends StatelessWidget {
       case TipoRelatorio.contasPagarReceber:
         return _CardConfig(
           icon: Icons.swap_vert_rounded,
-          accent: AppColors.blueMid,
-          bgSelected: AppColors.blueLight,
-          iconBg: const Color(0xFFB5D4F4),
-          iconColor: AppColors.blueDark,
-          badgeBg: const Color(0xFFB5D4F4),
-          badgeText: AppColors.blueDark,
+          accent: _T.blue,
         );
       case TipoRelatorio.clientesFornecedores:
         return _CardConfig(
           icon: Icons.people_outline_rounded,
-          accent: AppColors.tealMid,
-          bgSelected: AppColors.tealLight,
-          iconBg: const Color(0xFF9FE1CB),
-          iconColor: AppColors.tealDark,
-          badgeBg: const Color(0xFF9FE1CB),
-          badgeText: AppColors.tealDark,
+          accent: _T.teal,
         );
       case TipoRelatorio.usuarios:
         return _CardConfig(
           icon: Icons.manage_accounts_outlined,
-          accent: AppColors.purpleMid,
-          bgSelected: AppColors.purpleLight,
-          iconBg: const Color(0xFFCECBF6),
-          iconColor: AppColors.purpleDark,
-          badgeBg: const Color(0xFFCECBF6),
-          badgeText: AppColors.purpleDark,
+          accent: const Color(0xFF7E57C2), // Purple
         );
       case TipoRelatorio.investimentosDescontos:
         return _CardConfig(
           icon: Icons.trending_up_rounded,
-          accent: AppColors.amberMid,
-          bgSelected: AppColors.amberLight,
-          iconBg: const Color(0xFFFAC775),
-          iconColor: AppColors.amberDark,
-          badgeBg: const Color(0xFFFAC775),
-          badgeText: AppColors.amberDark,
+          accent: _T.orange,
         );
     }
   }
@@ -159,19 +132,9 @@ class RelatorioCardButton extends StatelessWidget {
 class _CardConfig {
   final IconData icon;
   final Color accent;
-  final Color bgSelected;
-  final Color iconBg;
-  final Color iconColor;
-  final Color badgeBg;
-  final Color badgeText;
 
   _CardConfig({
     required this.icon,
     required this.accent,
-    required this.bgSelected,
-    required this.iconBg,
-    required this.iconColor,
-    required this.badgeBg,
-    required this.badgeText,
   });
 }

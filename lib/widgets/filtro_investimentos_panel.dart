@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/relatorio_controller/relatorio_controller.dart';
 import '../model/relatorio_madel/filtro_investimentos.dart';
-import '../util/app_theme.dart';
 import 'filter_section.dart';
 import '../../widgets/toggle_pill_group.dart';
 
@@ -24,9 +23,6 @@ class FiltroInvestimentosPanel extends StatelessWidget {
             selected: f.tipoAnalise,
             labelFor: (v) => v.label,
             onChanged: (v) => context.read<RelatorioController>().setTipoAnalise(v),
-            activeColor: AppColors.amberMid,
-            activeBg: AppColors.amberLight,
-            activeText: AppColors.amberDark,
           ),
         ),
         const SizedBox(height: 16),
@@ -94,9 +90,6 @@ class FiltroInvestimentosPanel extends StatelessWidget {
             options: FiltroInvestimentos.opcoesMetricas,
             selected: f.metricas,
             onToggle: (v) => context.read<RelatorioController>().toggleMetrica(v),
-            activeColor: AppColors.amberMid,
-            activeBg: AppColors.amberLight,
-            activeText: AppColors.amberDark,
           ),
         ),
       ],

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../util/app_theme.dart';
-
-
 /// Grupo de pills de seleção única (radio behavior)
 class TogglePillGroup<T> extends StatelessWidget {
   final List<T> options;
   final T selected;
   final String Function(T) labelFor;
   final ValueChanged<T> onChanged;
-  final Color activeColor;
-  final Color activeBg;
-  final Color activeText;
+  final Color? activeColor;
+  final Color? activeBg;
+  final Color? activeText;
 
   const TogglePillGroup({
     super.key,
@@ -19,13 +16,18 @@ class TogglePillGroup<T> extends StatelessWidget {
     required this.selected,
     required this.labelFor,
     required this.onChanged,
-    this.activeColor = AppColors.blueMid,
-    this.activeBg = AppColors.blueLight,
-    this.activeText = AppColors.blueDark,
+    this.activeColor,
+    this.activeBg,
+    this.activeText,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = activeColor ?? theme.primaryColor;
+    final bg = activeBg ?? primary.withValues(alpha: 0.1);
+    final text = activeText ?? primary;
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -37,11 +39,11 @@ class TogglePillGroup<T> extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
-              color: isOn ? activeBg : const Color(0xFFF4F5F7),
+              color: isOn ? bg : theme.cardColor,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isOn ? activeColor : AppColors.border,
-                width: isOn ? 1.5 : 0.5,
+                color: isOn ? primary : theme.dividerColor.withValues(alpha: 0.2),
+                width: isOn ? 1.5 : 1,
               ),
             ),
             child: Text(
@@ -49,7 +51,7 @@ class TogglePillGroup<T> extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isOn ? FontWeight.w600 : FontWeight.w400,
-                color: isOn ? activeText : AppColors.textSecondary,
+                color: isOn ? text : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
               ),
             ),
           ),
@@ -64,22 +66,27 @@ class MultiTogglePillGroup extends StatelessWidget {
   final List<String> options;
   final Set<String> selected;
   final ValueChanged<String> onToggle;
-  final Color activeColor;
-  final Color activeBg;
-  final Color activeText;
+  final Color? activeColor;
+  final Color? activeBg;
+  final Color? activeText;
 
   const MultiTogglePillGroup({
     super.key,
     required this.options,
     required this.selected,
     required this.onToggle,
-    this.activeColor = AppColors.blueMid,
-    this.activeBg = AppColors.blueLight,
-    this.activeText = AppColors.blueDark,
+    this.activeColor,
+    this.activeBg,
+    this.activeText,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = activeColor ?? theme.primaryColor;
+    final bg = activeBg ?? primary.withValues(alpha: 0.1);
+    final text = activeText ?? primary;
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -91,11 +98,11 @@ class MultiTogglePillGroup extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
-              color: isOn ? activeBg : const Color(0xFFF4F5F7),
+              color: isOn ? bg : theme.cardColor,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isOn ? activeColor : AppColors.border,
-                width: isOn ? 1.5 : 0.5,
+                color: isOn ? primary : theme.dividerColor.withValues(alpha: 0.2),
+                width: isOn ? 1.5 : 1,
               ),
             ),
             child: Text(
@@ -103,7 +110,7 @@ class MultiTogglePillGroup extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isOn ? FontWeight.w600 : FontWeight.w400,
-                color: isOn ? activeText : AppColors.textSecondary,
+                color: isOn ? text : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
               ),
             ),
           ),

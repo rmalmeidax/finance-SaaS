@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/saida_controller.dart';
 import '../../model/saida_model.dart';
+import '../../widgets/custom_input_widget.dart';
+import '../../widgets/dashboard_resumo_card_widget.dart';
 
 // ══════════════════════════════════════════════════════════════
 // DESIGN TOKENS
@@ -50,7 +52,7 @@ class SaidaScreen extends StatelessWidget {
         systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6), size: 18),
+              color: theme.primaryColor, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -123,7 +125,7 @@ class SaidaScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
+                border: Border.all(color: theme.dividerColor),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -269,18 +271,56 @@ class SaidaScreen extends StatelessWidget {
         final isMobile = constraints.maxWidth < 600;
         
         final cards = [
-          _dashCard("TOTAL SAÍDAS", _T.fmtMoeda(controller.totalSaidas),
-              _T.teal, Icons.trending_down_outlined, wide: !isMobile),
-          _dashCard("PAGO", _T.fmtMoeda(controller.totalPago),
-              _T.green, Icons.check_circle_outline),
-          _dashCard("PENDENTE", _T.fmtMoeda(controller.totalPendente),
-              _T.orange, Icons.schedule_outlined),
-          _dashCard("VARIÁVEIS", _T.fmtMoeda(controller.totalVariaveis),
-              _T.blue, Icons.sync_outlined),
-          _dashCard("FIXAS", _T.fmtMoeda(controller.totalFixas),
-              const Color(0xFFB39DDB), Icons.lock_outline),
-          _dashCard("REGISTROS", "${controller.saidas.length}",
-              const Color(0xFF90A4AE), Icons.receipt_long_outlined),
+          Expanded(
+            flex: isMobile ? 1 : 2,
+            child: DashboardResumoCardWidget(
+              title: "TOTAL SAÍDAS",
+              value: _T.fmtMoeda(controller.totalSaidas),
+              color: _T.teal,
+              icon: Icons.trending_down_outlined,
+              isWide: !isMobile,
+            ),
+          ),
+          Expanded(
+            child: DashboardResumoCardWidget(
+              title: "PAGO",
+              value: _T.fmtMoeda(controller.totalPago),
+              color: _T.green,
+              icon: Icons.check_circle_outline,
+            ),
+          ),
+          Expanded(
+            child: DashboardResumoCardWidget(
+              title: "PENDENTE",
+              value: _T.fmtMoeda(controller.totalPendente),
+              color: _T.orange,
+              icon: Icons.schedule_outlined,
+            ),
+          ),
+          Expanded(
+            child: DashboardResumoCardWidget(
+              title: "VARIÁVEIS",
+              value: _T.fmtMoeda(controller.totalVariaveis),
+              color: _T.blue,
+              icon: Icons.sync_outlined,
+            ),
+          ),
+          Expanded(
+            child: DashboardResumoCardWidget(
+              title: "FIXAS",
+              value: _T.fmtMoeda(controller.totalFixas),
+              color: const Color(0xFFB39DDB),
+              icon: Icons.lock_outline,
+            ),
+          ),
+          Expanded(
+            child: DashboardResumoCardWidget(
+              title: "REGISTROS",
+              value: "${controller.saidas.length}",
+              color: const Color(0xFF90A4AE),
+              icon: Icons.receipt_long_outlined,
+            ),
+          ),
         ];
 
         if (isMobile) {
@@ -330,68 +370,6 @@ class SaidaScreen extends StatelessWidget {
     );
   }
 
-  Widget _dashCard(String titulo, String valor, Color cor, IconData icon,
-      {bool wide = false}) {
-    return Expanded(
-      flex: wide ? 2 : 1,
-      child: Builder(
-        builder: (context) {
-          final theme = Theme.of(context);
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: cor.withValues(alpha: 0.15)),
-              boxShadow: [
-                BoxShadow(
-                  color: cor.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: cor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Icon(icon, size: 12, color: cor),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(titulo,
-                          style: TextStyle(
-                              color: cor,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.2),
-                          overflow: TextOverflow.ellipsis),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(valor,
-                    style: TextStyle(
-                        color: theme.textTheme.bodyLarge?.color,
-                        fontSize: wide ? 16 : 14,
-                        fontFamily: _T.mono,
-                        fontWeight: FontWeight.w800),
-                    overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          );
-        }
-      ),
-    );
-  }
-
   // ── CARD ──
   Widget _saidaCard(
       BuildContext context, Saida s, SaidaController controller) {
@@ -406,7 +384,7 @@ class SaidaScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         children: [
@@ -655,6 +633,12 @@ class SaidaScreen extends StatelessWidget {
 
   Widget _infoItem(BuildContext context, IconData icon, String label, String value) {
     final theme = Theme.of(context);
+    final isMonospace = label.toLowerCase().contains("data") || 
+                        label.toLowerCase().contains("vencimento") ||
+                        label.toLowerCase().contains("valor") ||
+                        label.toLowerCase().contains("id") ||
+                        label.toLowerCase().contains("código");
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,9 +647,9 @@ class SaidaScreen extends StatelessWidget {
             children: [
               Icon(icon, size: 11, color: theme.primaryColor),
               const SizedBox(width: 4),
-              Text(label,
+              Text(label.toUpperCase(),
                   style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1)),
@@ -676,7 +660,7 @@ class SaidaScreen extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
-                  fontFamily: (label == 'Data' || label == 'Vencimento') ? _T.mono : null),
+                  fontFamily: isMonospace ? _T.mono : null),
               overflow: TextOverflow.ellipsis),
         ],
       ),
@@ -945,6 +929,7 @@ class SaidaScreen extends StatelessWidget {
   // ── DIALOG ──
   void _showDialog(BuildContext context, SaidaController controller,
       {Saida? saida}) {
+    final theme = Theme.of(context);
     final descricaoCtrl =
     TextEditingController(text: saida?.descricao ?? '');
     final fornecedorCtrl =
@@ -971,9 +956,9 @@ class SaidaScreen extends StatelessWidget {
         child: StatefulBuilder(builder: (context, setState) {
           return Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: theme.dialogBackgroundColor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Theme.of(context).dividerColor),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -984,32 +969,31 @@ class SaidaScreen extends StatelessWidget {
                       horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
                     border: Border(
-                        bottom: BorderSide(color: Theme.of(context).dividerColor)),
+                        bottom: BorderSide(color: theme.dividerColor)),
                   ),
                   child: Row(
                     children: [
                       Container(
                         width: 3,
-                        height: 18,
+                        height: 22,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
+                          color: _T.teal,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Text(
                         saida == null ? "NOVA SAÍDA" : "EDITAR SAÍDA",
-                        style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                        style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            letterSpacing: 2,
+                            letterSpacing: 3,
                             fontSize: 14),
                       ),
                       const Spacer(),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Icon(Icons.close,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
+                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.4), size: 20),
                       ),
                     ],
                   ),
@@ -1024,15 +1008,24 @@ class SaidaScreen extends StatelessWidget {
                       children: [
                         _labelSection(context, "INFORMAÇÕES"),
                         const SizedBox(height: 10),
-                        _inputField(descricaoCtrl, "Descrição",
-                            Icons.description_outlined),
+                        CustomInputWidget(
+                          controller: descricaoCtrl,
+                          label: "Descrição",
+                          icon: Icons.description_outlined,
+                        ),
                         const SizedBox(height: 10),
-                        _inputField(fornecedorCtrl, "Fornecedor / Origem",
-                            Icons.store_outlined),
+                        CustomInputWidget(
+                          controller: fornecedorCtrl,
+                          label: "Fornecedor / Origem",
+                          icon: Icons.store_outlined,
+                        ),
                         const SizedBox(height: 10),
-                        _inputField(valorCtrl, "Valor (ex: 1.500,00)",
-                            Icons.attach_money,
-                            keyboardType: TextInputType.number),
+                        CustomInputWidget(
+                          controller: valorCtrl,
+                          label: "Valor (ex: 1.500,00)",
+                          icon: Icons.attach_money,
+                          keyboardType: TextInputType.number,
+                        ),
 
                         const SizedBox(height: 20),
                         _labelSection(context, "TIPO DE DESPESA"),
@@ -1230,8 +1223,11 @@ class SaidaScreen extends StatelessWidget {
                           }).toList(),
                         ),
                         const SizedBox(height: 10),
-                        _inputField(obsCtrl, "Observação (opcional)",
-                            Icons.notes_outlined),
+                        CustomInputWidget(
+                          controller: obsCtrl,
+                          label: "Observação (opcional)",
+                          icon: Icons.notes_outlined,
+                        ),
                       ],
                     ),
                   ),
@@ -1242,7 +1238,7 @@ class SaidaScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     border: Border(
-                        top: BorderSide(color: Theme.of(context).dividerColor)),
+                        top: BorderSide(color: theme.dividerColor)),
                   ),
                   child: Row(
                     children: [
@@ -1253,15 +1249,15 @@ class SaidaScreen extends StatelessWidget {
                             padding:
                             const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).scaffoldBackgroundColor,
+                              color: theme.dividerColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                  color: Theme.of(context).dividerColor),
+                                  color: theme.dividerColor),
                             ),
                             child: Text("CANCELAR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 1.5)),
@@ -1299,14 +1295,14 @@ class SaidaScreen extends StatelessWidget {
                             padding:
                             const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
+                              color: theme.primaryColor,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
                               saida == null ? "SALVAR SAÍDA" : "ATUALIZAR",
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                  color: Theme.of(context).primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5),
@@ -1392,6 +1388,9 @@ class SaidaScreen extends StatelessWidget {
     );
   }
 
+  String _formatData(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
   Widget _labelSection(BuildContext context, String label) {
     return Row(
       children: [
@@ -1411,41 +1410,6 @@ class SaidaScreen extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.5)),
       ],
-    );
-  }
-
-  Widget _inputField(
-      TextEditingController ctrl,
-      String label,
-      IconData icon, {
-        TextInputType keyboardType = TextInputType.text,
-      }) {
-    return Builder(
-      builder: (context) {
-        final theme = Theme.of(context);
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
-          ),
-          child: TextField(
-            controller: ctrl,
-            keyboardType: keyboardType,
-            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, fontFamily: label.contains('Valor') ? _T.mono : null),
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.35), fontSize: 12),
-              prefixIcon:
-              Icon(icon, size: 16, color: theme.primaryColor),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14, horizontal: 12),
-            ),
-          ),
-        );
-      }
     );
   }
 }

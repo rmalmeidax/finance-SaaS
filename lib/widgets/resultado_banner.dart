@@ -3,14 +3,13 @@ import 'package:provider/provider.dart';
 
 import '../controllers/relatorio_controller/relatorio_controller.dart';
 import '../model/relatorio_madel/relatorio_request.dart';
-import '../util/app_theme.dart';
-
 
 class ResultadoBanner extends StatelessWidget {
   const ResultadoBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final r = context.watch<RelatorioController>().resultado;
 
     if (r.status == StatusRelatorio.idle || r.status == StatusRelatorio.gerando) {
@@ -18,14 +17,18 @@ class ResultadoBanner extends StatelessWidget {
     }
 
     final isSuccess = r.status == StatusRelatorio.sucesso;
+    final green = const Color(0xFF00BFA5);
+    final red = const Color(0xFFC62828);
+    
+    final mainColor = isSuccess ? green : red;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: isSuccess ? const Color(0xFFE1F5EE) : const Color(0xFFFCEBEB),
+        color: mainColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSuccess ? const Color(0xFF5DCAA5) : const Color(0xFFF09595),
+          color: mainColor.withValues(alpha: 0.3),
           width: 0.5,
         ),
       ),
@@ -35,7 +38,7 @@ class ResultadoBanner extends StatelessWidget {
             isSuccess
                 ? Icons.check_circle_outline_rounded
                 : Icons.error_outline_rounded,
-            color: isSuccess ? AppColors.tealMid : AppColors.error,
+            color: mainColor,
             size: 20,
           ),
           const SizedBox(width: 10),
@@ -48,18 +51,16 @@ class ResultadoBanner extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isSuccess
-                        ? AppColors.tealDark
-                        : const Color(0xFF791F1F),
+                    color: mainColor,
                   ),
                 ),
                 if (isSuccess && r.arquivoPath != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     r.arquivoPath!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.tealDark,
+                      color: mainColor.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -72,7 +73,7 @@ class ResultadoBanner extends StatelessWidget {
               icon: const Icon(Icons.open_in_new_rounded, size: 14),
               label: const Text('Abrir', style: TextStyle(fontSize: 12)),
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.tealMid,
+                foregroundColor: mainColor,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               ),
             ),

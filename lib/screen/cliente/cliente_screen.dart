@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/clientes_controller.dart';
 import '../../model/clientes_model.dart';
+import '../../widgets/dashboard_resumo_card_widget.dart';
+import '../../widgets/custom_input_widget.dart';
 
 // ══════════════════════════════════════════════════════════════
 // DESIGN TOKENS
@@ -44,9 +46,9 @@ class ClienteScreen extends StatelessWidget {
             Container(
               width: 3,
               height: 22,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: _T.teal,
-                borderRadius: BorderRadius.all(Radius.circular(2)),
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
             ),
             const SizedBox(width: 10),
@@ -171,28 +173,30 @@ class ClienteScreen extends StatelessWidget {
           Expanded(
             child: controller.clientes.isEmpty
                 ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people_outline,
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.12), size: 60),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Nenhum cliente encontrado",
-                    style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
-                        fontSize: 14,
-                        letterSpacing: 1),
-                  ),
-                ],
-              ),
-            )
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.people_outline,
+                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.12),
+                              size: 60),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Nenhum cliente encontrado",
+                            style: TextStyle(
+                                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
+                                fontSize: 14,
+                                letterSpacing: 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              itemCount: controller.clientes.length,
-              itemBuilder: (_, i) => _clienteCard(
-                  context, controller.clientes[i], controller),
-            ),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    itemCount: controller.clientes.length,
+                    itemBuilder: (_, i) => _clienteCard(context, controller.clientes[i], controller),
+                  ),
           ),
         ],
       ),
@@ -201,7 +205,6 @@ class ClienteScreen extends StatelessWidget {
 
   // ── DASHBOARD (Responsive Grid) ──
   Widget _dashboard(BuildContext context, ClienteController controller) {
-    final theme = Theme.of(context);
     final total = controller.clientes.length;
     final ativos =
         controller.clientes.where((c) => c.status == 'Ativo').length;
@@ -216,74 +219,29 @@ class ClienteScreen extends StatelessWidget {
         child: isMobile
             ? Column(
                 children: [
-                  _dashCard(context, "TOTAL", "$total", _T.teal, Icons.people_outline, isFullWidth: true),
+                  DashboardResumoCardWidget(title: "TOTAL", value: "$total", color: _T.teal, icon: Icons.people_outline),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      _dashCard(context, "ATIVOS", "$ativos", _T.green, Icons.check_circle_outline),
+                      Expanded(child: DashboardResumoCardWidget(title: "ATIVOS", value: "$ativos", color: _T.green, icon: Icons.check_circle_outline)),
                       const SizedBox(width: 10),
-                      _dashCard(context, "PJ", "$pj", _T.blue, Icons.business_outlined),
+                      Expanded(child: DashboardResumoCardWidget(title: "PJ", value: "$pj", color: _T.blue, icon: Icons.business_outlined)),
                     ],
                   ),
                 ],
               )
             : Row(
                 children: [
-                  _dashCard(context, "TOTAL", "$total", _T.teal, Icons.people_outline),
+                  Expanded(child: DashboardResumoCardWidget(title: "TOTAL", value: "$total", color: _T.teal, icon: Icons.people_outline)),
                   const SizedBox(width: 10),
-                  _dashCard(context, "ATIVOS", "$ativos", _T.green, Icons.check_circle_outline),
+                  Expanded(child: DashboardResumoCardWidget(title: "ATIVOS", value: "$ativos", color: _T.green, icon: Icons.check_circle_outline)),
                   const SizedBox(width: 10),
-                  _dashCard(context, "PJ", "$pj", _T.blue, Icons.business_outlined),
+                  Expanded(child: DashboardResumoCardWidget(title: "PJ", value: "$pj", color: _T.blue, icon: Icons.business_outlined)),
                 ],
               ),
       );
     });
   }
-
-  Widget _dashCard(BuildContext context, String titulo, String valor, Color cor, IconData icon, {bool isFullWidth = false}) {
-    final theme = Theme.of(context);
-    final card = Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cor.withValues(alpha: 0.15)),
-        boxShadow: [
-          BoxShadow(
-            color: cor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 13, color: cor),
-              const SizedBox(width: 5),
-              Text(titulo,
-                  style: TextStyle(
-                      color: cor,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5)),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(valor,
-            style: TextStyle(
-                color: theme.textTheme.bodyMedium?.color,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                fontFamily: _T.mono)),
-      ],
-    ),
-  );
-
-  return isFullWidth ? card : Expanded(child: card);
-}
 
   // ── CARD ──
   Widget _clienteCard(
@@ -396,71 +354,86 @@ class ClienteScreen extends StatelessWidget {
           // Corpo
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    _infoItem(context, Icons.badge_outlined, isPj ? "CNPJ" : "CPF",
-                        c.documento),
-                    _infoItem(context, Icons.phone_outlined, "Telefone",
-                        c.telefone.isEmpty ? '—' : c.telefone),
-                    _infoItem(context, Icons.email_outlined, "E-mail",
-                        c.email.isEmpty ? '—' : c.email),
-                  ],
-                ),
-                if (c.cidade.isNotEmpty || c.estado.isNotEmpty) ...[
-                  const SizedBox(height: 10),
+            child: LayoutBuilder(builder: (context, cardConstraints) {
+              final isSmall = cardConstraints.maxWidth < 400;
+              return Column(
+                children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _infoItem(
-                          context,
-                          Icons.location_on_outlined,
-                          "Cidade / UF",
-                          "${c.cidade}${c.estado.isNotEmpty ? ' - ${c.estado}' : ''}"),
-                      _infoItem(context, Icons.map_outlined, "Bairro",
-                          c.bairro.isEmpty ? '—' : c.bairro),
-                      _infoItem(context, Icons.markunread_mailbox_outlined, "CEP",
-                          c.cep.isEmpty ? '—' : c.cep),
+                      _infoItem(context, Icons.badge_outlined, isPj ? "CNPJ" : "CPF", c.documento),
+                      const SizedBox(width: 8),
+                      _infoItem(context, Icons.phone_outlined, "Telefone", c.telefone.isEmpty ? '—' : c.telefone),
+                      if (!isSmall) ...[
+                        const SizedBox(width: 8),
+                        _infoItem(context, Icons.email_outlined, "E-mail", c.email.isEmpty ? '—' : c.email),
+                      ],
+                    ],
+                  ),
+                  if (isSmall) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _infoItem(context, Icons.email_outlined, "E-mail", c.email.isEmpty ? '—' : c.email),
+                      ],
+                    ),
+                  ],
+                  if (c.cidade.isNotEmpty || c.estado.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _infoItem(context, Icons.location_on_outlined, "Cidade / UF",
+                            "${c.cidade}${c.estado.isNotEmpty ? ' - ${c.estado}' : ''}"),
+                        const SizedBox(width: 8),
+                        _infoItem(context, Icons.map_outlined, "Bairro", c.bairro.isEmpty ? '—' : c.bairro),
+                        if (!isSmall) ...[
+                          const SizedBox(width: 8),
+                          _infoItem(context, Icons.markunread_mailbox_outlined, "CEP", c.cep.isEmpty ? '—' : c.cep),
+                        ],
+                      ],
+                    ),
+                    if (isSmall) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          _infoItem(context, Icons.markunread_mailbox_outlined, "CEP", c.cep.isEmpty ? '—' : c.cep),
+                        ],
+                      ),
+                    ],
+                  ],
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _actionButton(
+                        icon: Icons.edit_outlined,
+                        tooltip: "Editar",
+                        color: theme.primaryColor.withValues(alpha: 0.1),
+                        iconColor: theme.primaryColor,
+                        onTap: () => _showDialog(context, controller, cliente: c),
+                      ),
+                      const SizedBox(width: 8),
+                      _actionButton(
+                        icon: isAtivo ? Icons.toggle_on_outlined : Icons.toggle_off_outlined,
+                        tooltip: isAtivo ? "Inativar" : "Ativar",
+                        color: isAtivo ? _T.red.withValues(alpha: 0.1) : _T.green.withValues(alpha: 0.1),
+                        iconColor: isAtivo ? _T.red : _T.green,
+                        onTap: () async => await controller.alterarStatus(c.id, isAtivo ? 'Inativo' : 'Ativo'),
+                      ),
+                      const SizedBox(width: 8),
+                      _actionButton(
+                        icon: Icons.delete_outline,
+                        tooltip: "Excluir",
+                        color: _T.red.withValues(alpha: 0.1),
+                        iconColor: _T.red,
+                        onTap: () => _confirmDelete(context, c, controller),
+                      ),
                     ],
                   ),
                 ],
-                const SizedBox(height: 14),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _actionButton(
-                      icon: Icons.edit_outlined,
-                      tooltip: "Editar",
-                      color: theme.primaryColor.withValues(alpha: 0.1),
-                      iconColor: theme.primaryColor,
-                      onTap: () =>
-                          _showDialog(context, controller, cliente: c),
-                    ),
-                    const SizedBox(width: 8),
-                    _actionButton(
-                      icon: isAtivo
-                          ? Icons.toggle_on_outlined
-                          : Icons.toggle_off_outlined,
-                      tooltip: isAtivo ? "Inativar" : "Ativar",
-                      color: isAtivo
-                          ? _T.red.withValues(alpha: 0.1)
-                          : _T.green.withValues(alpha: 0.1),
-                      iconColor: isAtivo ? _T.red : _T.green,
-                      onTap: () async => await controller.alterarStatus(
-                          c.id, isAtivo ? 'Inativo' : 'Ativo'),
-                    ),
-                    const SizedBox(width: 8),
-                    _actionButton(
-                      icon: Icons.delete_outline,
-                      tooltip: "Excluir",
-                      color: _T.red.withValues(alpha: 0.1),
-                      iconColor: _T.red,
-                      onTap: () => _confirmDelete(context, c, controller),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              );
+            }),
           ),
         ],
       ),
@@ -833,11 +806,11 @@ class ClienteScreen extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: _inputField(
-                                context,
-                                docCtrl,
-                                tipo == TipoPessoaCliente.juridica ? "Digite o CNPJ" : "Digite o CPF",
-                                Icons.badge_outlined,
+                              child: CustomInputWidget(
+                                controller: docCtrl,
+                                label: tipo == TipoPessoaCliente.juridica ? "CNPJ" : "CPF",
+                                hint: tipo == TipoPessoaCliente.juridica ? "Digite o CNPJ" : "Digite o CPF",
+                                icon: Icons.badge_outlined,
                                 keyboardType: TextInputType.number,
                               ),
                             ),
@@ -846,15 +819,15 @@ class ClienteScreen extends StatelessWidget {
                               GestureDetector(
                                 onTap: buscando ? null : buscarCnpj,
                                 child: Container(
-                                  height: 50,
-                                  width: 50,
+                                  height: 52,
+                                  width: 52,
                                   decoration: BoxDecoration(
                                     color: theme.primaryColor,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
                                   child: buscando
                                       ? Padding(
-                                    padding: const EdgeInsets.all(13),
+                                    padding: const EdgeInsets.all(15),
                                     child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary),
                                   )
                                       : Icon(Icons.search, color: theme.colorScheme.onPrimary, size: 20),
@@ -873,11 +846,11 @@ class ClienteScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: _T.red.withValues(alpha: 0.3)),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
-                                Icon(Icons.error_outline, color: _T.red, size: 14),
-                                SizedBox(width: 8),
-                                Text(erroCnpj!, style: TextStyle(color: _T.red, fontSize: 12)),
+                                const Icon(Icons.error_outline, color: _T.red, size: 14),
+                                const SizedBox(width: 8),
+                                Text(erroCnpj!, style: const TextStyle(color: _T.red, fontSize: 12)),
                               ],
                             ),
                           ),
@@ -911,24 +884,23 @@ class ClienteScreen extends StatelessWidget {
                           const SizedBox(height: 20),
                           _labelSection(context, "INFORMAÇÕES GERAIS"),
                           const SizedBox(height: 10),
-                          _inputField(
-                              context,
-                              nomeCtrl,
-                              tipo == TipoPessoaCliente.juridica ? "Razão Social" : "Nome Completo",
-                              Icons.person_outline),
+                          CustomInputWidget(
+                              controller: nomeCtrl,
+                              label: tipo == TipoPessoaCliente.juridica ? "Razão Social" : "Nome Completo",
+                              icon: Icons.person_outline),
                           if (tipo == TipoPessoaCliente.juridica) ...[
                             const SizedBox(height: 10),
-                            _inputField(context, fantasiaCtrl, "Nome Fantasia", Icons.storefront_outlined),
+                            CustomInputWidget(controller: fantasiaCtrl, label: "Nome Fantasia", icon: Icons.storefront_outlined),
                           ],
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
-                                child: _inputField(context, telefoneCtrl, "Telefone", Icons.phone_outlined, keyboardType: TextInputType.phone),
+                                child: CustomInputWidget(controller: telefoneCtrl, label: "Telefone", icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: _inputField(context, emailCtrl, "E-mail", Icons.email_outlined, keyboardType: TextInputType.emailAddress),
+                                child: CustomInputWidget(controller: emailCtrl, label: "E-mail", icon: Icons.email_outlined, keyboardType: TextInputType.emailAddress),
                               ),
                             ],
                           ),
@@ -940,12 +912,12 @@ class ClienteScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 flex: 2,
-                                child: _inputField(context, cepCtrl, "CEP", Icons.markunread_mailbox_outlined, keyboardType: TextInputType.number),
+                                child: CustomInputWidget(controller: cepCtrl, label: "CEP", icon: Icons.markunread_mailbox_outlined, keyboardType: TextInputType.number),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 3,
-                                child: _inputField(context, logradouroCtrl, "Logradouro", Icons.signpost_outlined),
+                                child: CustomInputWidget(controller: logradouroCtrl, label: "Logradouro", icon: Icons.signpost_outlined),
                               ),
                             ],
                           ),
@@ -953,12 +925,12 @@ class ClienteScreen extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: _inputField(context, numeroCtrl, "Número", Icons.tag),
+                                child: CustomInputWidget(controller: numeroCtrl, label: "Número", icon: Icons.tag),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 2,
-                                child: _inputField(context, complementoCtrl, "Complemento", Icons.home_outlined),
+                                child: CustomInputWidget(controller: complementoCtrl, label: "Complemento", icon: Icons.home_outlined),
                               ),
                             ],
                           ),
@@ -966,17 +938,17 @@ class ClienteScreen extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: _inputField(context, bairroCtrl, "Bairro", Icons.map_outlined),
+                                child: CustomInputWidget(controller: bairroCtrl, label: "Bairro", icon: Icons.map_outlined),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 2,
-                                child: _inputField(context, cidadeCtrl, "Cidade", Icons.location_city_outlined),
+                                child: CustomInputWidget(controller: cidadeCtrl, label: "Cidade", icon: Icons.location_city_outlined),
                               ),
                               const SizedBox(width: 10),
                               SizedBox(
-                                width: 60,
-                                child: _inputField(context, estadoCtrl, "UF", Icons.flag_outlined),
+                                width: 80,
+                                child: CustomInputWidget(controller: estadoCtrl, label: "UF", icon: Icons.flag_outlined),
                               ),
                             ],
                           ),
@@ -1088,40 +1060,6 @@ class ClienteScreen extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.5)),
       ],
-    );
-  }
-
-  Widget _inputField(
-      BuildContext context,
-      TextEditingController ctrl,
-      String label,
-      IconData icon, {
-        TextInputType keyboardType = TextInputType.text,
-      }) {
-    final theme = Theme.of(context);
-    final isMonospace = label.contains("CNPJ") || label.contains("CPF") || label == "Telefone" || label == "CEP";
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: TextField(
-        controller: ctrl,
-        keyboardType: keyboardType,
-        style: TextStyle(
-            color: theme.textTheme.bodyMedium?.color,
-            fontSize: 14,
-            fontFamily: isMonospace ? _T.mono : null),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.35), fontSize: 12),
-          prefixIcon: Icon(icon, size: 16, color: theme.primaryColor),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        ),
-      ),
     );
   }
 }

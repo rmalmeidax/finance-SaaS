@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/relatorio_controller/relatorio_controller.dart';
 import '../../model/relatorio_madel/relatorio_request.dart';
@@ -11,9 +12,12 @@ import '../../widgets/resultado_banner.dart';
 //  DESIGN TOKENS
 // ─────────────────────────────────────────────────────────────
 abstract class _T {
-  static const teal    = Color(0xFF00BFA5);
-  static const tealDim = Color(0xFF00897B);
-  static const mono    = 'monospace';
+  static const teal   = Color(0xFF00BFA5);
+  static const green  = Color(0xFF43A047);
+  static const orange = Color(0xFFEF6C00);
+  static const blue   = Color(0xFF1565C0);
+  static const red    = Color(0xFFC62828);
+  static const mono   = 'monospace';
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -68,30 +72,24 @@ class RelatoriosScreen extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(
       BuildContext context, ThemeData theme, Color? textColor) {
     return AppBar(
-      backgroundColor: theme.cardColor,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: 0,
-      toolbarHeight: 56,
+      systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       title: Row(
         children: [
+          const SizedBox(width: 8),
           // ── Botão voltar ──────────────────────────────────
-          GestureDetector(
-            onTap: () => Navigator.of(context).maybePop(),
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Icon(
-                Icons.chevron_left_rounded,
-                size: 24,
-                color: textColor?.withValues(alpha: 0.55),
-              ),
-            ),
+          IconButton(
+            icon: Icon(Icons.arrow_back_ios_new,
+                color: theme.primaryColor, size: 18),
+            onPressed: () => Navigator.of(context).maybePop(),
           ),
           // ── Barra teal + título ───────────────────────────
           Container(
             width: 3,
-            height: 20,
+            height: 22,
             decoration: BoxDecoration(
               color: _T.teal,
               borderRadius: BorderRadius.circular(2),
@@ -103,40 +101,18 @@ class RelatoriosScreen extends StatelessWidget {
             child: Text(
               'RELATÓRIOS',
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-                letterSpacing: 2.5,
-                fontFamily: _T.mono,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 3,
               ),
             ),
           ),
           const Spacer(),
           // ── Botão histórico com badge visual ─────────────
           _HistoricoButton(textColor: textColor),
-          const SizedBox(width: 8),
+          const SizedBox(width: 16),
         ],
-      ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: theme.dividerColor),
-      ),
-    );
-  }
-
-  void _showHistorico(BuildContext context) {
-    final theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: theme.cardColor,
-      isScrollControlled: true,        // permite crescer conforme conteúdo
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => ChangeNotifierProvider.value(
-        value: context.read<RelatorioController>(),
-        child: const _HistoricoSheet(),
       ),
     );
   }
@@ -170,7 +146,7 @@ class _HistoricoButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.history_rounded,
-                size: 16, color: textColor?.withValues(alpha: 0.7)),
+                size: 16, color: primary),
             if (count > 0) ...[
               const SizedBox(width: 5),
               Container(
@@ -223,7 +199,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+    final theme = Theme.of(context);
     return Row(
       children: [
         Icon(icon, size: 13, color: _T.teal),
@@ -233,7 +209,7 @@ class _SectionLabel extends StatelessWidget {
           style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.w700,
-            color: textColor?.withValues(alpha: 0.45),
+            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.45),
             fontFamily: _T.mono,
             letterSpacing: 1.8,
           ),
@@ -253,37 +229,30 @@ class _RelatorioGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctrl = context.watch<RelatorioController>();
 
-    return GridView.count(
-      crossAxisCount: _crossAxisCount(context),
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: _cardRatio(context),
-      children: TipoRelatorio.values
-          .map((tipo) => RelatorioCardButton(
-        tipo: tipo,
-        isSelected: ctrl.tipoSelecionado == tipo,
-        onTap: () =>
-            context.read<RelatorioController>().selecionarTipo(tipo),
-      ))
-          .toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        final crossAxisCount = isMobile ? 2 : 4;
+        final childAspectRatio = isMobile ? 1.1 : 1.3;
+
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: childAspectRatio,
+          children: TipoRelatorio.values
+              .map((tipo) => RelatorioCardButton(
+            tipo: tipo,
+            isSelected: ctrl.tipoSelecionado == tipo,
+            onTap: () =>
+                context.read<RelatorioController>().selecionarTipo(tipo),
+          ))
+              .toList(),
+        );
+      }
     );
-  }
-
-  int _crossAxisCount(BuildContext ctx) {
-    final w = MediaQuery.of(ctx).size.width;
-    if (w < 400) return 2;
-    if (w < 700) return 2;
-    return 4;
-  }
-
-  double _cardRatio(BuildContext ctx) {
-    final w = MediaQuery.of(ctx).size.width;
-    // Mobile: cards um pouco mais altos que largos
-    if (w < 400) return 1.3;
-    if (w < 700) return 1.4;
-    return 1.1;
   }
 }
 
@@ -313,7 +282,6 @@ class _HistoricoSheet extends StatelessWidget {
     final historico = context.watch<RelatorioController>().historico;
     final theme     = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
-    final primary   = theme.primaryColor;
     final border    = theme.dividerColor;
 
     return DraggableScrollableSheet(
@@ -534,8 +502,6 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final border = Theme.of(context).dividerColor;
-    final tc     = Theme.of(context).textTheme.bodyMedium?.color;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

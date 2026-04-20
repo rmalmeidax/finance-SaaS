@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/investimento_controller.dart';
 import '../../model/investimento_model.dart';
+import '../../widgets/dashboard_resumo_card_widget.dart';
+import '../../widgets/custom_input_widget.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DESIGN TOKENS
@@ -382,178 +384,111 @@ class _MetricsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final daily       = ctrl.dailyChange;
-    final primary     = Theme.of(context).primaryColor;
-    final cardColor   = Theme.of(context).cardColor;
-    final borderColor = Theme.of(context).dividerColor;
-    final textColor   = Theme.of(context).textTheme.bodyMedium?.color;
+    final daily = ctrl.dailyChange;
+    final primary = Theme.of(context).primaryColor;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isNarrow = constraints.maxWidth < 500;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 600;
 
-          if (isNarrow) {
-            return Column(
-              children: [
-                _MetricTile(
-                  label: 'PATRIMÔNIO',
-                  value: ctrl.fmtCurrency(ctrl.totalCurrent),
-                  sub: '${ctrl.fmtPercent(ctrl.returnPercent)} total',
-                  valueColor: _C.green2,
-                  subColor: primary,
-                  showBorder: false,
-                  isFullWidth: true,
-                ),
-                Divider(height: 1, color: borderColor),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _MetricTile(
-                        label: 'RENDIMENTO',
-                        value: ctrl.fmtCurrency(ctrl.totalReturn),
-                        sub: ctrl.totalReturn >= 0 ? '▲ lucro' : '▼ perda',
-                        valueColor: _C.blue,
-                        subColor: ctrl.totalReturn >= 0 ? primary : _C.red,
-                        showBorder: true,
-                      ),
-                    ),
-                    Expanded(
-                      child: _MetricTile(
-                        label: 'HOJE',
-                        value: ctrl.fmtCurrency(daily),
-                        sub: daily >= 0 ? '▲ hoje' : '▼ hoje',
-                        valueColor: daily >= 0 ? _C.green2 : _C.red,
-                        subColor: daily >= 0 ? primary : _C.red,
-                        showBorder: false,
-                      ),
-                    ),
-                  ],
-                ),
-                Divider(height: 1, color: borderColor),
-                _MetricTile(
-                  label: 'ATIVOS',
-                  value: '${ctrl.investments.length}',
-                  sub: 'na carteira',
-                  valueColor: textColor ?? Colors.white,
-                  subColor: textColor?.withValues(alpha: 0.6) ?? Colors.white70,
-                  showBorder: false,
-                  isFullWidth: true,
-                ),
-              ],
-            );
-          }
-
-          return Row(
+        if (isNarrow) {
+          return Column(
             children: [
-              _MetricTile(
-                label: 'PATRIMÔNIO',
-                value: ctrl.fmtCurrency(ctrl.totalCurrent),
-                sub: '${ctrl.fmtPercent(ctrl.returnPercent)} total',
-                valueColor: _C.green2,
-                subColor: primary,
-                showBorder: true,
+              Row(
+                children: [
+                  Expanded(
+                    child: DashboardResumoCardWidget(
+                      title: 'PATRIMÔNIO',
+                      value: ctrl.fmtCurrency(ctrl.totalCurrent),
+                      subtitle: '${ctrl.fmtPercent(ctrl.returnPercent)} total',
+                      color: _C.green2,
+                      icon: Icons.account_balance_wallet_outlined,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DashboardResumoCardWidget(
+                      title: 'RENDIMENTO',
+                      value: ctrl.fmtCurrency(ctrl.totalReturn),
+                      subtitle: ctrl.totalReturn >= 0 ? '▲ lucro' : '▼ perda',
+                      color: _C.blue,
+                      icon: Icons.trending_up,
+                    ),
+                  ),
+                ],
               ),
-              _MetricTile(
-                label: 'RENDIMENTO',
-                value: ctrl.fmtCurrency(ctrl.totalReturn),
-                sub: ctrl.totalReturn >= 0 ? '▲ lucro' : '▼ perda',
-                valueColor: _C.blue,
-                subColor: ctrl.totalReturn >= 0 ? primary : _C.red,
-                showBorder: true,
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: DashboardResumoCardWidget(
+                      title: 'HOJE',
+                      value: ctrl.fmtCurrency(daily),
+                      subtitle: daily >= 0 ? '▲ hoje' : '▼ hoje',
+                      color: daily >= 0 ? _C.green2 : _C.red,
+                      icon: Icons.today,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DashboardResumoCardWidget(
+                      title: 'ATIVOS',
+                      value: '${ctrl.investments.length}',
+                      subtitle: 'na carteira',
+                      color: primary,
+                      icon: Icons.list_alt,
+                    ),
+                  ),
+                ],
               ),
-              _MetricTile(
-                label: 'HOJE',
-                value: ctrl.fmtCurrency(daily),
-                sub: daily >= 0 ? '▲ hoje' : '▼ hoje',
-                valueColor: daily >= 0 ? _C.green2 : _C.red,
-                subColor: daily >= 0 ? primary : _C.red,
-                showBorder: true,
-              ),
-              _MetricTile(
-                label: 'ATIVOS',
-                value: '${ctrl.investments.length}',
-                sub: 'na carteira',
-                valueColor: textColor ?? Colors.white,
-                subColor: textColor?.withValues(alpha: 0.6) ?? Colors.white70,
-                showBorder: false,
-              ),
-            ].map((t) => Expanded(child: t)).toList(),
+            ],
           );
-        },
-      ),
-    );
-  }
-}
+        }
 
-class _MetricTile extends StatelessWidget {
-  final String label, value, sub;
-  final Color valueColor, subColor;
-  final bool showBorder;
-  final bool isFullWidth;
-
-  const _MetricTile({
-    required this.label,
-    required this.value,
-    required this.sub,
-    required this.valueColor,
-    required this.subColor,
-    required this.showBorder,
-    this.isFullWidth = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = Theme.of(context).dividerColor;
-    final textColor   = Theme.of(context).textTheme.bodyMedium?.color;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-      decoration: showBorder
-          ? BoxDecoration(border: Border(right: BorderSide(color: borderColor)))
-          : null,
-      child: Column(
-        crossAxisAlignment:
-        isFullWidth ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: TextStyle(
-                  color: textColor?.withValues(alpha: 0.4),
-                  fontSize: 8,
-                  fontFamily: _C.mono,
-                  letterSpacing: 1.6,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(height: 5),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment:
-            isFullWidth ? Alignment.center : Alignment.centerLeft,
-            child: Text(value,
-                style: TextStyle(
-                    color: valueColor,
-                    fontFamily: _C.mono,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -.6)),
-          ),
-          const SizedBox(height: 4),
-          Text(sub,
-              style: TextStyle(
-                  color: subColor, fontSize: 10, fontFamily: _C.mono)),
-        ],
-      ),
+        return Row(
+          children: [
+            Expanded(
+              child: DashboardResumoCardWidget(
+                title: 'PATRIMÔNIO',
+                value: ctrl.fmtCurrency(ctrl.totalCurrent),
+                subtitle: '${ctrl.fmtPercent(ctrl.returnPercent)} total',
+                color: _C.green2,
+                icon: Icons.account_balance_wallet_outlined,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: DashboardResumoCardWidget(
+                title: 'RENDIMENTO',
+                value: ctrl.fmtCurrency(ctrl.totalReturn),
+                subtitle: ctrl.totalReturn >= 0 ? '▲ lucro' : '▼ perda',
+                color: _C.blue,
+                icon: Icons.trending_up,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: DashboardResumoCardWidget(
+                title: 'HOJE',
+                value: ctrl.fmtCurrency(daily),
+                subtitle: daily >= 0 ? '▲ hoje' : '▼ hoje',
+                color: daily >= 0 ? _C.green2 : _C.red,
+                icon: Icons.today,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: DashboardResumoCardWidget(
+                title: 'ATIVOS',
+                value: '${ctrl.investments.length}',
+                subtitle: 'na carteira',
+                color: primary,
+                icon: Icons.list_alt,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -1158,10 +1093,11 @@ class _FormCardState extends State<_FormCard> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _Field(
+                    CustomInputWidget(
+                      controller: _name,
                       label: 'NOME / ATIVO',
-                      child: _Input(
-                          ctrl: _name, hint: 'Ex: PETR4, Bitcoin...'),
+                      icon: Icons.label_outline,
+                      hint: 'Ex: PETR4, Bitcoin...',
                     ),
                     const SizedBox(height: 10),
                     _Field(
@@ -1173,10 +1109,12 @@ class _FormCardState extends State<_FormCard> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _Field(
+                    CustomInputWidget(
+                      controller: _invest,
                       label: 'VALOR INVESTIDO (R\$)',
-                      child: _Input(
-                          ctrl: _invest, hint: '0,00', isNum: true),
+                      icon: Icons.attach_money,
+                      keyboardType: TextInputType.number,
+                      hint: '0,00',
                     ),
                   ],
                 );
@@ -1187,10 +1125,12 @@ class _FormCardState extends State<_FormCard> {
                 children: [
                   Expanded(
                     flex: 3,
-                    child: _Field(
-                        label: 'NOME / ATIVO',
-                        child: _Input(
-                            ctrl: _name, hint: 'Ex: PETR4, Bitcoin...')),
+                    child: CustomInputWidget(
+                      controller: _name,
+                      label: 'NOME / ATIVO',
+                      icon: Icons.label_outline,
+                      hint: 'Ex: PETR4, Bitcoin...',
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -1207,10 +1147,13 @@ class _FormCardState extends State<_FormCard> {
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 2,
-                    child: _Field(
-                        label: 'VALOR INVESTIDO (R\$)',
-                        child: _Input(
-                            ctrl: _invest, hint: '0,00', isNum: true)),
+                    child: CustomInputWidget(
+                      controller: _invest,
+                      label: 'VALOR INVESTIDO (R\$)',
+                      icon: Icons.attach_money,
+                      keyboardType: TextInputType.number,
+                      hint: '0,00',
+                    ),
                   ),
                 ],
               );
@@ -1227,16 +1170,20 @@ class _FormCardState extends State<_FormCard> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _Field(
+                    CustomInputWidget(
+                      controller: _atual,
                       label: 'VALOR ATUAL (R\$)',
-                      child: _Input(
-                          ctrl: _atual, hint: '0,00', isNum: true),
+                      icon: Icons.show_chart,
+                      keyboardType: TextInputType.number,
+                      hint: '0,00',
                     ),
                     const SizedBox(height: 10),
-                    _Field(
+                    CustomInputWidget(
+                      controller: _qty,
                       label: 'QTD. COTAS / AÇÕES',
-                      child:
-                      _Input(ctrl: _qty, hint: '0', isNum: true),
+                      icon: Icons.pin_outlined,
+                      keyboardType: TextInputType.number,
+                      hint: '0',
                     ),
                     const SizedBox(height: 10),
                     _buildDateField(
@@ -1249,17 +1196,23 @@ class _FormCardState extends State<_FormCard> {
               return Row(
                 children: [
                   Expanded(
-                    child: _Field(
-                        label: 'VALOR ATUAL (R\$)',
-                        child: _Input(
-                            ctrl: _atual, hint: '0,00', isNum: true)),
+                    child: CustomInputWidget(
+                      controller: _atual,
+                      label: 'VALOR ATUAL (R\$)',
+                      icon: Icons.show_chart,
+                      keyboardType: TextInputType.number,
+                      hint: '0,00',
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _Field(
-                        label: 'QTD. COTAS / AÇÕES',
-                        child:
-                        _Input(ctrl: _qty, hint: '0', isNum: true)),
+                    child: CustomInputWidget(
+                      controller: _qty,
+                      label: 'QTD. COTAS / AÇÕES',
+                      icon: Icons.pin_outlined,
+                      keyboardType: TextInputType.number,
+                      hint: '0',
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -1372,47 +1325,6 @@ class _Field extends StatelessWidget {
         const SizedBox(height: 5),
         child,
       ],
-    );
-  }
-}
-
-class _Input extends StatelessWidget {
-  final TextEditingController ctrl;
-  final String hint;
-  final bool isNum;
-  const _Input(
-      {required this.ctrl, required this.hint, this.isNum = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final textColor   = Theme.of(context).textTheme.bodyMedium?.color;
-    final primary     = Theme.of(context).primaryColor;
-    final borderColor = Theme.of(context).dividerColor;
-    final bgColor     = Theme.of(context).scaffoldBackgroundColor;
-
-    return TextField(
-      controller: ctrl,
-      keyboardType: isNum ? TextInputType.number : TextInputType.text,
-      style: TextStyle(
-          color: textColor, fontSize: 12, fontFamily: _C.mono),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(
-            color: textColor?.withValues(alpha: 0.4), fontSize: 12),
-        filled: true,
-        fillColor: bgColor,
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(7),
-            borderSide: BorderSide(color: borderColor)),
-        enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(7),
-            borderSide: BorderSide(color: borderColor)),
-        focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(7),
-            borderSide: BorderSide(color: primary, width: 1.2)),
-      ),
     );
   }
 }

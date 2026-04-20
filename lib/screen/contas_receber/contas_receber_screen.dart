@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/conta_receber_controller.dart';
 import '../../model/conta_receber_model.dart';
+import '../../widgets/custom_input_widget.dart';
+import '../../widgets/dashboard_resumo_card_widget.dart';
 
 // ══════════════════════════════════════════════════════════════
 // DESIGN TOKENS
@@ -511,15 +513,36 @@ class ContasReceberScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _dashCard(context, "TOTAL", total, theme.primaryColor, Icons.account_balance_wallet_outlined),
+                      Expanded(
+                        child: DashboardResumoCardWidget(
+                          title: "TOTAL",
+                          value: _T.fmtMoeda(total),
+                          color: theme.primaryColor,
+                          icon: Icons.account_balance_wallet_outlined,
+                        ),
+                      ),
                       const SizedBox(width: 10),
-                      _dashCard(context, "VENCIDO", vencido, _T.red, Icons.warning_amber_outlined),
+                      Expanded(
+                        child: DashboardResumoCardWidget(
+                          title: "VENCIDO",
+                          value: _T.fmtMoeda(vencido),
+                          color: _T.red,
+                          icon: Icons.warning_amber_outlined,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      _dashCard(context, "A RECEBER", aVencer, _T.green, Icons.schedule_outlined),
+                      Expanded(
+                        child: DashboardResumoCardWidget(
+                          title: "A RECEBER",
+                          value: _T.fmtMoeda(aVencer),
+                          color: _T.green,
+                          icon: Icons.schedule_outlined,
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       const Spacer(),
                     ],
@@ -528,65 +551,36 @@ class ContasReceberScreen extends StatelessWidget {
               )
             : Row(
                 children: [
-                  _dashCard(context, "TOTAL", total, theme.primaryColor, Icons.account_balance_wallet_outlined),
+                  Expanded(
+                    child: DashboardResumoCardWidget(
+                      title: "TOTAL",
+                      value: _T.fmtMoeda(total),
+                      color: theme.primaryColor,
+                      icon: Icons.account_balance_wallet_outlined,
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  _dashCard(context, "VENCIDO", vencido, _T.red, Icons.warning_amber_outlined),
+                  Expanded(
+                    child: DashboardResumoCardWidget(
+                      title: "VENCIDO",
+                      value: _T.fmtMoeda(vencido),
+                      color: _T.red,
+                      icon: Icons.warning_amber_outlined,
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  _dashCard(context, "A RECEBER", aVencer, _T.green, Icons.schedule_outlined),
+                  Expanded(
+                    child: DashboardResumoCardWidget(
+                      title: "A RECEBER",
+                      value: _T.fmtMoeda(aVencer),
+                      color: _T.green,
+                      icon: Icons.schedule_outlined,
+                    ),
+                  ),
                 ],
               ),
       );
     });
-  }
-
-  Widget _dashCard(
-      BuildContext context, String titulo, double valor, Color cor, IconData icon, {bool isFullWidth = false}) {
-    final theme = Theme.of(context);
-    final card = Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cor.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 13, color: cor),
-              const SizedBox(width: 5),
-              Text(
-                titulo,
-                style: TextStyle(
-                  color: cor,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "R\$",
-            style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4), fontSize: 10),
-          ),
-          Text(
-            _T.fmtMoeda(valor).replaceFirst('R\$ ', ''),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              fontFamily: _T.mono,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-
-    return isFullWidth ? card : Expanded(child: card);
   }
 
   String _formatData(DateTime d) =>
@@ -689,17 +683,27 @@ class ContasReceberScreen extends StatelessWidget {
                         children: [
                           _labelSection(context, "INFORMAÇÕES GERAIS"),
                           const SizedBox(height: 10),
-                          _inputField(context, cliente, "Cliente",
-                              Icons.person_outline),
+                          CustomInputWidget(
+                            controller: cliente,
+                            label: "Cliente",
+                            icon: Icons.person_outline,
+                          ),
                           const SizedBox(height: 10),
-                          _inputField(context, descricao, "Descrição",
-                              Icons.description_outlined),
+                          CustomInputWidget(
+                            controller: descricao,
+                            label: "Descrição",
+                            icon: Icons.description_outlined,
+                          ),
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
-                                  child: _inputField(context, numero,
-                                      "Nº Documento", Icons.tag)),
+                                child: CustomInputWidget(
+                                  controller: numero,
+                                  label: "Nº Documento",
+                                  icon: Icons.tag,
+                                ),
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: _dropdownTipo(context, tipo,
@@ -740,20 +744,20 @@ class ContasReceberScreen extends StatelessWidget {
                           const SizedBox(height: 20),
                           _labelSection(context, "VALORES"),
                           const SizedBox(height: 10),
-                          _inputField(
-                              context,
-                              valor, "Valor (ex: 1000,50)",
-                              Icons.attach_money,
-                              keyboardType: TextInputType.number),
+                          CustomInputWidget(
+                            controller: valor,
+                            label: "Valor (ex: 1000,50)",
+                            icon: Icons.attach_money,
+                            keyboardType: TextInputType.number,
+                          ),
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
-                                child: _inputField(
-                                  context,
-                                  jurosMensal,
-                                  "Juros Mensal (%)",
-                                  Icons.trending_up,
+                                child: CustomInputWidget(
+                                  controller: jurosMensal,
+                                  label: "Juros Mensal (%)",
+                                  icon: Icons.trending_up,
                                   keyboardType: TextInputType.number,
                                   onChanged: (_) => setState(() {}),
                                 ),
@@ -815,9 +819,12 @@ class ContasReceberScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          _inputField(context, multaCtrl, "Multa (%)",
-                              Icons.gavel_outlined,
-                              keyboardType: TextInputType.number),
+                          CustomInputWidget(
+                            controller: multaCtrl,
+                            label: "Multa (%)",
+                            icon: Icons.gavel_outlined,
+                            keyboardType: TextInputType.number,
+                          ),
                         ],
                       ),
                     ),
@@ -968,45 +975,6 @@ class ContasReceberScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _inputField(
-      BuildContext context,
-      TextEditingController ctrl,
-      String label,
-      IconData icon, {
-        TextInputType keyboardType = TextInputType.text,
-        void Function(String)? onChanged,
-      }) {
-    final theme = Theme.of(context);
-    final isMonospace = label.contains("Valor") || label.contains("Juros") || label.contains("Multa") || label.contains("Nº Documento");
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: TextField(
-        controller: ctrl,
-        keyboardType: keyboardType,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontFamily: isMonospace ? _T.mono : null,
-        ),
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
-            fontSize: 12,
-          ),
-          prefixIcon:
-          Icon(icon, size: 16, color: theme.primaryColor),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-              vertical: 14, horizontal: 12),
-        ),
-      ),
     );
   }
 

@@ -193,6 +193,7 @@ class _CadastroScreenState extends State<CadastroScreen>
                         const SizedBox(height: 8),
                         CustomInputWidget(
                           controller: emailController,
+                          label: "E-mail",
                           hint: "seu@email.com",
                           icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
@@ -204,6 +205,7 @@ class _CadastroScreenState extends State<CadastroScreen>
                         const SizedBox(height: 8),
                         CustomInputWidget(
                           controller: senhaController,
+                          label: "Senha",
                           hint: "Mínimo 6 caracteres",
                           icon: Icons.lock_outline,
                           obscure: true,
@@ -215,6 +217,7 @@ class _CadastroScreenState extends State<CadastroScreen>
                         const SizedBox(height: 8),
                         CustomInputWidget(
                           controller: confirmarSenhaController,
+                          label: "Confirmar senha",
                           hint: "Repita sua senha",
                           icon: Icons.lock_outline,
                           obscure: true,

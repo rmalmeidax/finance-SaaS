@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/conta_pagar_controller.dart';
+import '../../widgets/custom_input_widget.dart';
+import '../../widgets/dashboard_resumo_card_widget.dart';
 
 // ══════════════════════════════════════════════════════════════
 // DESIGN TOKENS
@@ -50,7 +52,8 @@ class ContasPagarScreen extends StatelessWidget {
         elevation: 0,
         systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: theme.primaryColor, size: 18),
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: theme.primaryColor, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -98,7 +101,8 @@ class ContasPagarScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: theme.cardColor,
-                borderRadius: BorderRadius.circular(14), // Standard 14px
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: theme.dividerColor),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -108,7 +112,7 @@ class ContasPagarScreen extends StatelessWidget {
                 ],
               ),
               child: TextField(
-                style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14),
+                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: "Buscar fornecedor ou descrição...",
                   hintStyle: TextStyle(
@@ -134,19 +138,16 @@ class ContasPagarScreen extends StatelessWidget {
           // ── FILTROS ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _filtroChip(context, "Todas", FiltroStatus.todos, controller),
-                  const SizedBox(width: 8),
-                  _filtroChip(context, "A pagar", FiltroStatus.aVencer, controller),
-                  const SizedBox(width: 8),
-                  _filtroChip(context, "Vencidas", FiltroStatus.vencidos, controller),
-                  const SizedBox(width: 8),
-                  _filtroChip(context, "Pagas", FiltroStatus.pagos, controller),
-                ],
-              ),
+            child: Row(
+              children: [
+                _filtroChip(context, "Todas", FiltroStatus.todos, controller),
+                const SizedBox(width: 8),
+                _filtroChip(context, "A pagar", FiltroStatus.aVencer, controller),
+                const SizedBox(width: 8),
+                _filtroChip(context, "Vencidas", FiltroStatus.vencidos, controller),
+                const SizedBox(width: 8),
+                _filtroChip(context, "Pagas", FiltroStatus.pagos, controller),
+              ],
             ),
           ),
 
@@ -211,28 +212,21 @@ class ContasPagarScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         children: [
-          // Cabeçalho colorido (Standardized)
+          // Cabeçalho
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.05), // Standard 0.05 opacity
+              color: statusColor.withValues(alpha: 0.07),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
               border: Border(
-                bottom: BorderSide(color: statusColor.withValues(alpha: 0.1)),
+                bottom: BorderSide(color: statusColor.withValues(alpha: 0.2)),
               ),
             ),
             child: Row(
@@ -253,9 +247,9 @@ class ContasPagarScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
+                    color: statusColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.4)),
                   ),
                   child: Text(
                     statusLabel,
@@ -384,7 +378,11 @@ class ContasPagarScreen extends StatelessWidget {
 
   Widget _infoItem(BuildContext context, IconData icon, String label, String value) {
     final theme = Theme.of(context);
-    final isMonospace = label == "Emissão" || label == "Vencimento" || label == "Juros/Multa" || label == "Documento";
+    final isMonospace = label.toLowerCase().contains("emissão") || 
+                        label.toLowerCase().contains("vencimento") ||
+                        label.toLowerCase().contains("documento") ||
+                        label.toLowerCase().contains("juros") ||
+                        label.toLowerCase().contains("valor");
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,39 +446,39 @@ class ContasPagarScreen extends StatelessWidget {
   Widget _filtroChip(BuildContext context, String label, FiltroStatus filtro, ContaPagarController c) {
     final theme = Theme.of(context);
     final selecionado = c.filtroAtual == filtro;
-    return GestureDetector(
-      onTap: () => c.setFiltro(filtro),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        decoration: BoxDecoration(
-          color: selecionado ? theme.primaryColor : theme.cardColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: selecionado
-                ? theme.primaryColor
-                : theme.dividerColor,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => c.setFiltro(filtro),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: selecionado ? theme.primaryColor : theme.cardColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: selecionado
+                  ? theme.primaryColor
+                  : theme.dividerColor,
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: selecionado 
-                ? theme.colorScheme.onPrimary
-                : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
-            fontSize: 11,
-            fontWeight: selecionado ? FontWeight.w700 : FontWeight.w400,
-            letterSpacing: 0.5,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selecionado 
+                  ? (theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white)
+                  : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.54),
+              fontSize: 11,
+              fontWeight: selecionado ? FontWeight.w700 : FontWeight.w400,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
       ),
     );
   }
 
-  // ── DASHBOARD (Responsive Grid) ──
   Widget _dashboard(BuildContext context, ContaPagarController controller) {
-    final theme = Theme.of(context);
     double total = 0, vencido = 0, aPagar = 0;
     final hoje = DateTime.now();
     for (var c in controller.contas) {
@@ -497,20 +495,43 @@ class ContasPagarScreen extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       final isMobile = constraints.maxWidth < 600;
 
+      final cards = [
+        Expanded(
+          flex: isMobile ? 1 : 2,
+          child: DashboardResumoCardWidget(
+            title: "TOTAL",
+            value: _T.fmtMoeda(total),
+            color: _T.teal,
+            icon: Icons.account_balance_wallet_outlined,
+            isWide: !isMobile,
+          ),
+        ),
+        Expanded(
+          child: DashboardResumoCardWidget(
+            title: "VENCIDO",
+            value: _T.fmtMoeda(vencido),
+            color: _T.red,
+            icon: Icons.warning_amber_outlined,
+          ),
+        ),
+        Expanded(
+          child: DashboardResumoCardWidget(
+            title: "A PAGAR",
+            value: _T.fmtMoeda(aPagar),
+            color: _T.blue,
+            icon: Icons.schedule_outlined,
+          ),
+        ),
+      ];
+
       if (isMobile) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              _dashCard(context, "TOTAL", total, _T.teal, Icons.account_balance_wallet_outlined, isFullWidth: true),
+              Row(children: [cards[0]]),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  _dashCard(context, "VENCIDO", vencido, _T.red, Icons.warning_amber_outlined),
-                  const SizedBox(width: 10),
-                  _dashCard(context, "A PAGAR", aPagar, _T.blue, Icons.schedule_outlined),
-                ],
-              ),
+              Row(children: [cards[1], const SizedBox(width: 10), cards[2]]),
             ],
           ),
         );
@@ -520,68 +541,17 @@ class ContasPagarScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
           children: [
-            _dashCard(context, "TOTAL", total, _T.teal, Icons.account_balance_wallet_outlined),
+            cards[0],
             const SizedBox(width: 10),
-            _dashCard(context, "VENCIDO", vencido, _T.red, Icons.warning_amber_outlined),
+            cards[1],
             const SizedBox(width: 10),
-            _dashCard(context, "A PAGAR", aPagar, _T.blue, Icons.schedule_outlined),
+            cards[2],
           ],
         ),
       );
     });
   }
 
-  Widget _dashCard(BuildContext context, String titulo, double valor, Color cor, IconData icon, {bool isFullWidth = false}) {
-    final theme = Theme.of(context);
-    final card = Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cor.withValues(alpha: 0.15)),
-        boxShadow: [
-          BoxShadow(
-            color: cor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 13, color: cor),
-              const SizedBox(width: 5),
-              Text(
-                titulo,
-                style: TextStyle(
-                  color: cor,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _T.fmtMoeda(valor),
-            style: TextStyle(
-              color: theme.textTheme.bodyLarge?.color,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              fontFamily: _T.mono,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-
-    return isFullWidth ? card : Expanded(child: card);
-  }
 
   // ── DIALOG ──
   void _showDialog(BuildContext context, ContaPagarController controller,
@@ -617,7 +587,7 @@ class ContasPagarScreen extends StatelessWidget {
           builder: (context, setState) {
             return Container(
               decoration: BoxDecoration(
-                color: theme.cardColor,
+                color: theme.dialogBackgroundColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: theme.dividerColor),
               ),
@@ -669,13 +639,13 @@ class ContasPagarScreen extends StatelessWidget {
                         children: [
                           _labelSection(context, "INFORMAÇÕES GERAIS"),
                           const SizedBox(height: 10),
-                          _inputField(context, fornecedor, "Fornecedor", Icons.store_outlined),
+                          CustomInputWidget(controller: fornecedor, label: "Fornecedor", icon: Icons.store_outlined),
                           const SizedBox(height: 10),
-                          _inputField(context, descricao, "Descrição", Icons.description_outlined),
+                          CustomInputWidget(controller: descricao, label: "Descrição", icon: Icons.description_outlined),
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              Expanded(child: _inputField(context, numero, "Nº Documento", Icons.tag)),
+                              Expanded(child: CustomInputWidget(controller: numero, label: "Nº Documento", icon: Icons.tag)),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: _dropdownTipo(context, tipo, (v) => setState(() => tipo = v!)),
@@ -713,17 +683,16 @@ class ContasPagarScreen extends StatelessWidget {
                           const SizedBox(height: 20),
                           _labelSection(context, "VALORES"),
                           const SizedBox(height: 10),
-                          _inputField(context, valor, "Valor (ex: 1000,50)", Icons.attach_money,
+                          CustomInputWidget(controller: valor, label: "Valor (ex: 1000,50)", icon: Icons.attach_money,
                               keyboardType: TextInputType.number),
                           const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
-                                child: _inputField(
-                                  context,
-                                  jurosMensal,
-                                  "Juros Mensal (%)",
-                                  Icons.trending_up,
+                                child: CustomInputWidget(
+                                  controller: jurosMensal,
+                                  label: "Juros Mensal (%)",
+                                  icon: Icons.trending_up,
                                   keyboardType: TextInputType.number,
                                   onChanged: (_) => setState(() {}),
                                 ),
@@ -778,7 +747,7 @@ class ContasPagarScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          _inputField(context, multaCtrl, "Multa (%)", Icons.gavel_outlined,
+                          CustomInputWidget(controller: multaCtrl, label: "Multa (%)", icon: Icons.gavel_outlined,
                               keyboardType: TextInputType.number),
                         ],
                       ),
@@ -921,44 +890,6 @@ class ContasPagarScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _inputField(
-      BuildContext context,
-      TextEditingController ctrl,
-      String label,
-      IconData icon, {
-        TextInputType keyboardType = TextInputType.text,
-        void Function(String)? onChanged,
-      }) {
-    final theme = Theme.of(context);
-    final isMonospace = label.contains("Valor") || label.contains("Juros") || label.contains("Multa") || label.contains("Nº Documento");
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: TextField(
-        controller: ctrl,
-        keyboardType: keyboardType,
-        style: TextStyle(
-            color: theme.textTheme.bodyMedium?.color,
-            fontSize: 14,
-            fontFamily: isMonospace ? _T.mono : null),
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
-            fontSize: 12,
-          ),
-          prefixIcon: Icon(icon, size: 16, color: theme.primaryColor),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        ),
-      ),
     );
   }
 
