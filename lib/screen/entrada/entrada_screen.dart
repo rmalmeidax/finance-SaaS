@@ -1148,4 +1148,4 @@ class EntradaScreen extends StatelessWidget {
     );
   }
 }
-}
+

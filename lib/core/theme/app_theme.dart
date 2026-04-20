@@ -18,8 +18,14 @@ class AppTheme {
       ),
       dividerColor: Colors.grey[300],
       textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.black87),
-        bodySmall: TextStyle(color: Colors.black54),
+        displayLarge: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        displayMedium: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        titleMedium: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(color: Colors.black),
+        bodyMedium: TextStyle(color: Colors.black),
+        bodySmall: TextStyle(color: Color(0xFF424242)), // Grey 800 para contraste
+        labelLarge: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
       ),
       colorScheme: ColorScheme.light(
         primary: const Color(0xFF26A69A),

@@ -2,7 +2,7 @@ import 'package:finance/controllers/theme_controller.dart';
 import 'package:finance/controllers/conta_pagar_controller.dart';
 import 'package:finance/controllers/fornecedor_controller.dart';
 import 'package:finance/controllers/investimento_controller.dart';
-import 'package:finance/controllers/usuario_controller.dart';
+import 'package:finance/controllers/perfil_controller.dart';
 import 'package:finance/services/auth_service.dart';
 import 'package:finance/services/cliente_service.dart';
 import 'package:finance/services/conta_pagar_service.dart';
@@ -12,8 +12,9 @@ import 'package:finance/services/fornecedor_service.dart';
 import 'package:finance/services/investimento_service.dart';
 import 'package:finance/services/relatorio_service/relatorio_service.dart';
 import 'package:finance/services/saida_service.dart';
-import 'package:finance/services/usuario_service.dart';
+import 'package:finance/services/perfil_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
@@ -27,6 +28,7 @@ import 'controllers/desconto_controller.dart';
 import 'controllers/entrada_controller.dart';
 import 'controllers/relatorio_controller/relatorio_controller.dart';
 import 'controllers/saida_controller.dart';
+import 'controllers/usuario_controller.dart';
 import 'core/theme/app_theme.dart';
 
 // 🔹 Firebase config
@@ -71,7 +73,7 @@ void main() async {
           create: (_) => InvestmentController(),
         ),
         ChangeNotifierProvider(
-          create: (_) => UsuarioController(),
+          create: (_) => PerfilController(),
         ),
         ChangeNotifierProvider(
           create: (_) => DescontoController(),
@@ -80,6 +82,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => RelatorioController(RelatorioService()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UsuarioController(),
         ),
       ],
       child: const MyApp(),
@@ -103,6 +108,17 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeController.themeMode,
+
+      // 🌐 Localização (Necessário para o DatePicker)
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+      ],
+      locale: const Locale('pt', 'BR'),
 
       // 🧭 Tela inicial baseada no estado de auth
       home: Consumer<AuthService>(

@@ -90,7 +90,7 @@ class UsuarioScreen extends StatelessWidget {
             child: IconButton(
               padding: EdgeInsets.zero,
               iconSize: 18,
-              icon: Icon(Icons.person_add_outlined, 
+              icon: Icon(Icons.person_add_outlined,
                   color: theme.primaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white),
               onPressed: () => _showDialog(context, controller),
             ),
@@ -238,49 +238,49 @@ class UsuarioScreen extends StatelessWidget {
 
   Widget _buildDashboard(BuildContext context, UsuarioController c) {
     return LayoutBuilder(
-      builder: (context, constraints) {
-        bool isWide = constraints.maxWidth > 600;
-        
-        if (isWide) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Expanded(child: DashboardResumoCardWidget(title: 'TOTAL', value: '${c.usuarios.length}', color: _T.teal, icon: Icons.people_outline)),
-                const SizedBox(width: 10),
-                Expanded(child: DashboardResumoCardWidget(title: 'ATIVOS', value: '${c.totalAtivos}', color: _T.green, icon: Icons.check_circle_outline)),
-                const SizedBox(width: 10),
-                Expanded(child: DashboardResumoCardWidget(title: 'ADMINS', value: '${c.totalAdmins}', color: const Color(0xFF4FC3F7), icon: Icons.admin_panel_settings_outlined)),
-                const SizedBox(width: 10),
-                Expanded(child: DashboardResumoCardWidget(title: 'PENDENTES', value: '${c.totalPendentes}', color: _T.orange, icon: Icons.hourglass_empty_outlined)),
-              ],
-            ),
-          );
-        } else {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: DashboardResumoCardWidget(title: 'TOTAL', value: '${c.usuarios.length}', color: _T.teal, icon: Icons.people_outline)),
-                    const SizedBox(width: 10),
-                    Expanded(child: DashboardResumoCardWidget(title: 'ATIVOS', value: '${c.totalAtivos}', color: _T.green, icon: Icons.check_circle_outline)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(child: DashboardResumoCardWidget(title: 'ADMINS', value: '${c.totalAdmins}', color: const Color(0xFF4FC3F7), icon: Icons.admin_panel_settings_outlined)),
-                    const SizedBox(width: 10),
-                    Expanded(child: DashboardResumoCardWidget(title: 'PENDENTES', value: '${c.totalPendentes}', color: _T.orange, icon: Icons.hourglass_empty_outlined)),
-                  ],
-                ),
-              ],
-            ),
-          );
+        builder: (context, constraints) {
+          bool isWide = constraints.maxWidth > 600;
+
+          if (isWide) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(child: DashboardResumoCardWidget(title: 'TOTAL', value: '${c.usuarios.length}', color: _T.teal, icon: Icons.people_outline)),
+                  const SizedBox(width: 10),
+                  Expanded(child: DashboardResumoCardWidget(title: 'ATIVOS', value: '${c.totalAtivos}', color: _T.green, icon: Icons.check_circle_outline)),
+                  const SizedBox(width: 10),
+                  Expanded(child: DashboardResumoCardWidget(title: 'ADMINS', value: '${c.totalAdmins}', color: const Color(0xFF4FC3F7), icon: Icons.admin_panel_settings_outlined)),
+                  const SizedBox(width: 10),
+                  Expanded(child: DashboardResumoCardWidget(title: 'PENDENTES', value: '${c.totalPendentes}', color: _T.orange, icon: Icons.hourglass_empty_outlined)),
+                ],
+              ),
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: DashboardResumoCardWidget(title: 'TOTAL', value: '${c.usuarios.length}', color: _T.teal, icon: Icons.people_outline)),
+                      const SizedBox(width: 10),
+                      Expanded(child: DashboardResumoCardWidget(title: 'ATIVOS', value: '${c.totalAtivos}', color: _T.green, icon: Icons.check_circle_outline)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: DashboardResumoCardWidget(title: 'ADMINS', value: '${c.totalAdmins}', color: const Color(0xFF4FC3F7), icon: Icons.admin_panel_settings_outlined)),
+                      const SizedBox(width: 10),
+                      Expanded(child: DashboardResumoCardWidget(title: 'PENDENTES', value: '${c.totalPendentes}', color: _T.orange, icon: Icons.hourglass_empty_outlined)),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }
         }
-      }
     );
   }
 
@@ -851,7 +851,7 @@ class UsuarioScreen extends StatelessWidget {
                                 const Duration(milliseconds: 200),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 14, vertical: 12),
-                                  decoration: BoxDecoration(
+                                decoration: BoxDecoration(
                                   color: sel
                                       ? cor.withValues(alpha: 0.15)
                                       : theme.scaffoldBackgroundColor,
@@ -1260,9 +1260,9 @@ class UsuarioScreen extends StatelessWidget {
         keyboardType: keyboardType,
         maxLines: obscureText ? 1 : maxLines,
         style: TextStyle(
-            color: enabled ? theme.textTheme.bodyMedium?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.38),
-            fontSize: 14,
-            fontFamily: (label == 'Telefone' || label == 'Senha') ? _T.mono : null,
+          color: enabled ? theme.textTheme.bodyMedium?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.38),
+          fontSize: 14,
+          fontFamily: (label == 'Telefone' || label == 'Senha') ? _T.mono : null,
         ),
         decoration: InputDecoration(
           labelText: label,
@@ -1346,13 +1346,13 @@ class UsuarioScreen extends StatelessWidget {
   }
 
   Widget _actionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String tooltip,
-    required Color color,
-    required Color iconColor,
-    required VoidCallback onTap,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String tooltip,
+        required Color color,
+        required Color iconColor,
+        required VoidCallback onTap,
+      }) {
     return Tooltip(
       message: tooltip,
       child: InkWell(
@@ -1461,11 +1461,11 @@ class UsuarioScreen extends StatelessWidget {
   }
 
   Widget _btnAcao(
-    BuildContext context, {
-    required String label,
-    required Color cor,
-    VoidCallback? onTap,
-  }) {
+      BuildContext context, {
+        required String label,
+        required Color cor,
+        VoidCallback? onTap,
+      }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

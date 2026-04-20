@@ -6,17 +6,20 @@ import 'package:finance/screen/contas_receber/contas_receber_screen.dart';
 import 'package:finance/screen/entrada/entrada_screen.dart';
 import 'package:finance/screen/fornecedor/fornecedor_screen.dart';
 import 'package:finance/screen/saida/saida_screen.dart';
-import 'package:finance/screen/usuario/usuario_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/theme_toggle_button.dart';
 
+import '../perfil/perfil_screen.dart';
 import '../contas_pagar/contas_pagar_screen.dart';
 import '../desconto/desconto_screen.dart';
 import '../investimento/investimento_screen.dart';
 import '../relatorios/relatorios_screen.dart';
+import '../usuario/usuario_screen.dart';
+
 
 // ─────────────────────────────────────────────────────────────
 //  DESIGN TOKENS
@@ -135,17 +138,16 @@ class HomeScreen extends StatelessWidget {
                         Icons.trending_down, _DC.amber,
                         const SaidaScreen(), width: itemWidth),
                   if (isAdmin)
-                    _buildMenuCard(context, 'Investimentos',
-                        Icons.show_chart, Colors.purple,
-                        const InvestimentosScreen(), width: itemWidth),
+                    _buildMenuCard(context, 'Usuários',
+                        Icons.people, Colors.indigo,
+                        const UsuarioScreen(), width: itemWidth),
                   if (isAdmin)
                     _buildMenuCard(context, 'Descontos',
                         Icons.percent, Colors.redAccent,
                         const DescontoScreen(), width: itemWidth),
-                  if (isAdmin)
-                    _buildMenuCard(context, 'Usuários',
-                        Icons.people_alt, Colors.indigo,
-                        const UsuarioScreen(), width: itemWidth),
+                  _buildMenuCard(context, 'Meu Perfil',
+                      Icons.person_pin, Colors.blueGrey,
+                      PerfilScreen(userId: authService.user!.uid), width: itemWidth),
                   _buildMenuCard(context, 'Fornecedor',
                       Icons.business, Colors.brown,
                       const FornecedorScreen(), width: itemWidth),
